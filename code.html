@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SafeMix Healthcare AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+    .animate-float-delay-1 {
+        animation: float 5s ease-in-out infinite 1s;
+    }
+    .animate-float-delay-2 {
+        animation: float 7s ease-in-out infinite 2s;
+    }
+    .animate-float-delay-3 {
+        animation: float 6s ease-in-out infinite 3s;
+    }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+</style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#cfe9d5",
+                      "on-tertiary-container": "#ffefef",
+                      "primary-fixed": "#d0e9d5",
+                      "on-primary-fixed-variant": "#374b3d",
+                      "on-tertiary-fixed": "#2c1518",
+                      "surface": "#fbf9f6",
+                      "primary-fixed-dim": "#b5ccba",
+                      "tertiary": "#6e4e51",
+                      "on-primary-container": "#e1f9e5",
+                      "on-tertiary-fixed-variant": "#5d3f42",
+                      "outline": "#737873",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container": "#efeeeb",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#e3e2e0",
+                      "on-primary-fixed": "#0b1f14",
+                      "background": "#fbf9f6",
+                      "inverse-on-surface": "#f2f0ee",
+                      "secondary": "#4c6454",
+                      "secondary-fixed-dim": "#b3cdba",
+                      "on-secondary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-surface-variant": "#434843",
+                      "on-secondary-container": "#516858",
+                      "on-error": "#ffffff",
+                      "surface-variant": "#e3e2e0",
+                      "tertiary-container": "#886669",
+                      "tertiary-fixed": "#ffd9dc",
+                      "inverse-surface": "#30312f",
+                      "secondary-container": "#cce6d2",
+                      "surface-bright": "#fbf9f6",
+                      "inverse-primary": "#b5ccba",
+                      "on-secondary-fixed-variant": "#354c3d",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed": "#092014",
+                      "tertiary-fixed-dim": "#e6bcbf",
+                      "on-background": "#1b1c1a",
+                      "primary-container": "#5e7464",
+                      "outline-variant": "#c3c8c1",
+                      "surface-container-low": "#f5f3f1",
+                      "surface-tint": "#4e6354",
+                      "on-primary": "#ffffff",
+                      "surface-container-high": "#e9e8e5",
+                      "on-surface": "#1b1c1a",
+                      "error-container": "#ffdad6",
+                      "primary": "#465b4c",
+                      "surface-dim": "#dbdad7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "40px",
+                      "stack-sm": "8px",
+                      "unit": "8px",
+                      "container-max": "1280px",
+                      "stack-md": "16px",
+                      "gutter": "24px",
+                      "stack-lg": "32px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "h3": [
+                              "manrope"
+                      ],
+                      "caps-xs": [
+                              "inter"
+                      ],
+                      "body-lg": [
+                              "inter"
+                      ],
+                      "h2": [
+                              "manrope"
+                      ],
+                      "label-sm": [
+                              "inter"
+                      ],
+                      "h1": [
+                              "manrope"
+                      ],
+                      "body-md": [
+                              "inter"
+                      ]
+              },
+              "fontSize": {
+                      "h3": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "caps-xs": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "h2": [
+                              "36px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "h1": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-slate-800/50 shadow-[0_4px_20px_-10px_rgba(94,116,100,0.15)]">
+<div class="flex justify-between items-center h-20 px-6 lg:px-12 w-full max-w-8xl mx-auto">
+<div class="text-2xl font-bold tracking-tight text-[#5E7464] dark:text-[#8BA391] font-h3">
+                SafeMix
+            </div>
+<div class="hidden md:flex gap-8">
+<a class="text-[#5E7464] dark:text-[#8BA391] border-b-2 border-[#5E7464] pb-1 font-label-sm hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform" href="#">Home</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-[#5E7464] font-label-sm hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform" href="#">Features</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-[#5E7464] font-label-sm hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform" href="#">Doctors</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-[#5E7464] font-label-sm hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform" href="#">Security</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-[#5E7464] font-label-sm hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform" href="#">Pricing</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:block font-label-sm text-[#5E7464] dark:text-[#8BA391] hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform">Login</button>
+<button class="bg-primary text-on-primary font-label-sm px-6 py-3 rounded-full hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform shadow-[0_4px_12px_rgba(70,91,76,0.2)]">Get Started</button>
+</div>
+</div>
+</nav>
+<main class="pt-20">
+<!-- 1. HERO SECTION -->
+<section class="relative overflow-hidden pt-16 pb-24 lg:pt-32 lg:pb-40">
+<div class="absolute inset-0 z-0 opacity-40">
+<div class="absolute top-0 right-0 w-[800px] h-[800px] bg-secondary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-50 transform translate-x-1/3 -translate-y-1/4"></div>
+<div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-50 transform -translate-x-1/4 translate-y-1/4"></div>
+</div>
+<div class="max-w-container-max mx-auto px-6 lg:px-12 relative z-10">
+<div class="grid lg:grid-cols-2 gap-16 items-center">
+<div class="max-w-2xl">
+<span class="inline-block py-1 px-3 rounded-full bg-surface-container-high text-primary font-caps-xs text-caps-xs mb-6 border border-outline-variant/30">
+                            India’s First Medicine Safety AI
+                        </span>
+<h1 class="font-h1 text-h1 text-on-surface mb-6">
+                            Know If Your Medicines Clash <span class="text-primary relative inline-block">
+                                Before They Harm You
+                                <svg class="absolute -bottom-2 left-0 w-full h-3 text-secondary-fixed-dim opacity-50" fill="none" preserveaspectratio="none" viewbox="0 0 200 12">
+<path d="M0,10 Q100,0 200,10" stroke="currentColor" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-xl">
+                            Instantly scan prescriptions, ayurvedic remedies, and supplements to detect dangerous interactions using clinical-grade AI.
+                        </p>
+<div class="flex flex-wrap gap-4 items-center">
+<button class="bg-primary text-on-primary font-label-sm px-8 py-4 rounded-full hover:bg-surface-tint transition-colors shadow-[0_8px_24px_rgba(70,91,76,0.25)] flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">document_scanner</span>
+                                Scan Medicines
+                            </button>
+<button class="bg-surface-container-lowest text-primary font-label-sm px-8 py-4 rounded-full hover:bg-surface-container transition-colors border border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined">play_circle</span>
+                                Watch Demo
+                            </button>
+</div>
+</div>
+<div class="relative mx-auto w-full max-w-[400px] lg:max-w-[480px]">
+<div class="absolute inset-0 bg-gradient-to-tr from-secondary-fixed to-primary-fixed rounded-[40px] transform rotate-3 scale-105 opacity-50 blur-xl"></div>
+<!-- 3D Phone Mockup -->
+<div class="relative w-full rounded-[3rem] shadow-2xl border-[12px] border-slate-900 bg-slate-900 overflow-hidden aspect-[9/19.5]">
+<!-- Top Island -->
+<div class="absolute top-0 inset-x-0 h-6 flex justify-center z-20">
+<div class="w-32 h-6 bg-slate-900 rounded-b-3xl"></div>
+</div>
+<!-- App Interface -->
+<div class="relative h-full w-full bg-slate-50 flex flex-col pt-12 pb-6 px-5">
+<!-- App Header -->
+<div class="flex justify-between items-center mb-6">
+<div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="font-h3 text-xl font-bold text-primary tracking-tight">SafeMix</div>
+<div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-primary relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-white"></span>
+</div>
+</div>
+<!-- High Fidelity Alert Card -->
+<div class="bg-white rounded-3xl p-6 shadow-[0_10px_40px_-10px_rgba(186,26,26,0.2)] border border-error-container relative overflow-hidden mb-8">
+<div class="absolute -top-6 -right-6 p-4 opacity-[0.03]">
+<span class="material-symbols-outlined text-[120px] text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="flex items-center gap-3 mb-4 relative z-10">
+<div class="w-10 h-10 rounded-full bg-error text-white flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<span class="font-caps-xs text-error font-bold tracking-widest text-sm">RED ALERT</span>
+</div>
+<h3 class="font-h3 text-2xl text-on-surface mb-6 relative z-10 leading-tight">Severe Interaction Detected</h3>
+<div class="bg-surface-container-low rounded-2xl p-4 mb-5 border border-outline-variant/30">
+<div class="flex justify-between items-center mb-3">
+<span class="font-body-md font-semibold text-on-surface">Metformin 500mg</span>
+<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase">Allopathic</span>
+</div>
+<div class="flex justify-center my-2 relative">
+<div class="absolute inset-x-0 top-1/2 h-px bg-outline-variant/30"></div>
+<span class="material-symbols-outlined text-outline bg-surface-container-low px-2 relative z-10">close</span>
+</div>
+<div class="flex justify-between items-center mt-3">
+<span class="font-body-md font-semibold text-on-surface">Karela Juice</span>
+<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase">Ayurvedic</span>
+</div>
+</div>
+<p class="font-body-md text-sm text-error/90 mb-6 leading-relaxed relative z-10 font-medium">
+                High risk of extreme hypoglycemia. This combination can cause dangerously low blood sugar levels.
+            </p>
+<button class="w-full bg-error text-white font-label-sm py-3.5 rounded-xl shadow-[0_8px_20px_rgba(186,26,26,0.25)] hover:bg-error/90 transition-colors">
+                View Alternatives &amp; Actions
+            </button>
+</div>
+<!-- Scan Button -->
+<div class="mt-auto">
+<button class="w-full bg-primary text-white font-label-sm py-4 rounded-2xl shadow-[0_8px_24px_rgba(70,91,76,0.3)] flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined">document_scanner</span>
+                 Scan New Medicine
+             </button>
+</div>
+</div>
+</div>
+<!-- Floating Glass Cards -->
+<div class="hidden md:block">
+<!-- OCR Scan -->
+<div class="absolute -left-16 top-16 glass-card p-4 rounded-2xl animate-float z-30">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-blue-50/80 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined">document_scanner</span>
+</div>
+<div>
+<div class="font-label-sm font-bold text-slate-800">OCR Scan</div>
+<div class="text-xs text-slate-500 font-medium mt-0.5">Auto-read Rx</div>
+</div>
+</div>
+</div>
+<!-- Hindi Voice -->
+<div class="absolute -right-12 top-32 glass-card p-4 rounded-2xl animate-float-delay-1 z-30">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-orange-50/80 text-orange-500 flex items-center justify-center">
+<span class="material-symbols-outlined">mic</span>
+</div>
+<div>
+<div class="font-label-sm font-bold text-slate-800">Voice Input</div>
+<div class="text-xs text-slate-500 font-medium mt-0.5">Works in Hindi</div>
+</div>
+</div>
+</div>
+<!-- Family Profiles -->
+<div class="absolute -left-10 bottom-32 glass-card p-4 rounded-2xl animate-float-delay-2 z-30">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-purple-50/80 text-purple-600 flex items-center justify-center">
+<span class="material-symbols-outlined">family_restroom</span>
+</div>
+<div>
+<div class="font-label-sm font-bold text-slate-800">Family Profiles</div>
+<div class="text-xs text-slate-500 font-medium mt-0.5">Track for loved ones</div>
+</div>
+</div>
+</div>
+<!-- 10 Languages -->
+<div class="absolute -right-8 bottom-16 glass-card p-4 rounded-2xl animate-float-delay-3 z-30">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-teal-50/80 text-teal-600 flex items-center justify-center">
+<span class="material-symbols-outlined">translate</span>
+</div>
+<div>
+<div class="font-label-sm font-bold text-slate-800">Multilingual</div>
+<div class="text-xs text-slate-500 font-medium mt-0.5">10+ Languages</div>
+</div>
+</div>
+</div>
+<!-- Verified Reports -->
+<div class="absolute right-1/4 -bottom-6 glass-card p-4 rounded-2xl animate-float z-30">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-emerald-50/80 text-emerald-600 flex items-center justify-center">
+<span class="material-symbols-outlined">verified_user</span>
+</div>
+<div>
+<div class="font-label-sm font-bold text-slate-800">Verified Reports</div>
+<div class="text-xs text-slate-500 font-medium mt-0.5">Clinical Grade AI</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. TRUST METRICS -->
+<section class="py-12 bg-surface-container-low border-y border-surface-container-highest">
+<div class="max-w-container-max mx-auto px-6 lg:px-12">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+<div class="text-center">
+<h3 class="font-h2 text-h2 text-primary mb-2">500K+</h3>
+<p class="font-label-sm text-on-surface-variant">Checks Performed</p>
+</div>
+<div class="text-center">
+<h3 class="font-h2 text-h2 text-primary mb-2">10+</h3>
+<p class="font-label-sm text-on-surface-variant">Indian Languages</p>
+</div>
+<div class="text-center">
+<h3 class="font-h2 text-h2 text-primary mb-2">99.9%</h3>
+<p class="font-label-sm text-on-surface-variant">Secure &amp; Private</p>
+</div>
+<div class="text-center">
+<h3 class="font-h2 text-h2 text-primary mb-2">24/7</h3>
+<p class="font-label-sm text-on-surface-variant">AI Monitoring</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. PROBLEM SECTION -->
+<section class="py-24 max-w-container-max mx-auto px-6 lg:px-12">
+<div class="text-center max-w-3xl mx-auto mb-16">
+<h2 class="font-h2 text-h2 text-on-surface mb-4">Millions Mix Medicines Without Knowing The Risk</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Common combinations of allopathic medicines and natural remedies can have unintended consequences.</p>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<!-- Scenario 1 -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-4">
+<div class="flex gap-2">
+<span class="bg-surface-container-high px-3 py-1 rounded-full font-caps-xs text-caps-xs">Allopathic</span>
+<span class="bg-surface-container-high px-3 py-1 rounded-full font-caps-xs text-caps-xs">Ayurvedic</span>
+</div>
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-surface mb-2">Metformin + Karela</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Taking bitter gourd juice with diabetes medication can cause dangerously low blood sugar levels.</p>
+</div>
+<!-- Scenario 2 -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-4">
+<div class="flex gap-2">
+<span class="bg-surface-container-high px-3 py-1 rounded-full font-caps-xs text-caps-xs">Allopathic</span>
+<span class="bg-surface-container-high px-3 py-1 rounded-full font-caps-xs text-caps-xs">Natural</span>
+</div>
+<span class="material-symbols-outlined text-tertiary-container">info</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-surface mb-2">BP Meds + Mulethi</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Licorice root (Mulethi) can reduce the effectiveness of certain blood pressure medications.</p>
+</div>
+<!-- Scenario 3 -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/30 hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-4">
+<div class="flex gap-2">
+<span class="bg-surface-container-high px-3 py-1 rounded-full font-caps-xs text-caps-xs">Allopathic</span>
+<span class="bg-surface-container-high px-3 py-1 rounded-full font-caps-xs text-caps-xs">Supplement</span>
+</div>
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-surface mb-2">Thyroid + Calcium</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Calcium supplements can block the absorption of thyroid medication if taken too closely together.</p>
+</div>
+</div>
+</section>
+<!-- 10. FINAL CTA -->
+<section class="py-24 px-6 lg:px-12 max-w-container-max mx-auto">
+<div class="bg-gradient-to-br from-primary-fixed to-secondary-fixed rounded-[32px] p-12 text-center relative overflow-hidden shadow-lg">
+<div class="absolute inset-0 bg-white/20 backdrop-blur-sm"></div>
+<div class="relative z-10 max-w-2xl mx-auto">
+<h2 class="font-h2 text-h2 text-on-primary-fixed mb-6">Protect Your Family Today</h2>
+<p class="font-body-lg text-body-lg text-on-primary-fixed-variant mb-10">
+                        Join over 500,000 Indians making safer healthcare decisions with SafeMix AI.
+                    </p>
+<button class="bg-primary text-on-primary font-label-sm px-8 py-4 rounded-full hover:bg-surface-tint transition-colors shadow-lg">
+                        Get SafeMix for Free
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#F9FBF9] dark:bg-slate-950 w-full py-16 px-6 lg:px-12 border-t border-gray-100 dark:border-slate-800 flat no shadows">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-7xl mx-auto">
+<div class="col-span-2 md:col-span-1">
+<span class="text-xl font-bold text-[#5E7464] mb-4 block font-h3">SafeMix</span>
+<p class="font-manrope text-sm leading-relaxed text-slate-500 dark:text-slate-400 mt-4">
+                    © 2024 SafeMix Healthcare AI. Built with precision for India.
+                </p>
+</div>
+<div>
+<h4 class="font-label-sm font-semibold text-[#5E7464] mb-4">Product</h4>
+<ul class="space-y-3">
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">Features</li>
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">Pricing</li>
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">Security</li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-sm font-semibold text-[#5E7464] mb-4">Company</h4>
+<ul class="space-y-3">
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">About Us</li>
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">Careers</li>
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">Contact</li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-sm font-semibold text-[#5E7464] mb-4">Legal</h4>
+<ul class="space-y-3">
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">Privacy Policy</li>
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">Terms of Service</li>
+<li class="font-label-sm text-slate-500 dark:text-slate-400 hover:text-[#5E7464] dark:hover:text-[#8BA391] transition-colors cursor-pointer">Medical Disclaimer</li>
+</ul>
+</div>
+</div>
+</footer>
+</body></html>

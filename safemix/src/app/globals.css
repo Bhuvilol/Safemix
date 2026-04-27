@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+/* ── Dark mode via class ── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── SafeMix Design System ── */
+@theme {
+  /* Fonts */
+  --font-manrope: "Manrope", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Brand Colors */
+  --color-primary: #465b4c;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #5e7464;
+  --color-on-primary-container: #e1f9e5;
+  --color-inverse-primary: #b5ccba;
+  --color-surface-tint: #4e6354;
+  --color-primary-fixed: #d0e9d5;
+  --color-primary-fixed-dim: #b5ccba;
+  --color-on-primary-fixed: #0b1f14;
+  --color-on-primary-fixed-variant: #374b3d;
+
+  /* Secondary */
+  --color-secondary: #4c6454;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #cce6d2;
+  --color-on-secondary-container: #516858;
+  --color-secondary-fixed: #cfe9d5;
+  --color-secondary-fixed-dim: #b3cdba;
+  --color-on-secondary-fixed: #092014;
+  --color-on-secondary-fixed-variant: #354c3d;
+
+  /* Tertiary */
+  --color-tertiary: #6e4e51;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #886669;
+  --color-on-tertiary-container: #ffefef;
+  --color-tertiary-fixed: #ffd9dc;
+  --color-tertiary-fixed-dim: #e6bcbf;
+  --color-on-tertiary-fixed: #2c1518;
+  --color-on-tertiary-fixed-variant: #5d3f42;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  /* Surface */
+  --color-surface: #fbf9f6;
+  --color-surface-dim: #dbdad7;
+  --color-surface-bright: #fbf9f6;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f5f3f1;
+  --color-surface-container: #efeeeb;
+  --color-surface-container-high: #e9e8e5;
+  --color-surface-container-highest: #e3e2e0;
+  --color-surface-variant: #e3e2e0;
+  --color-on-surface: #1b1c1a;
+  --color-on-surface-variant: #434843;
+  --color-inverse-surface: #30312f;
+  --color-inverse-on-surface: #f2f0ee;
+  --color-outline: #737873;
+  --color-outline-variant: #c3c8c1;
+  --color-background: #fbf9f6;
+  --color-on-background: #1b1c1a;
+
+  /* Accent */
+  --color-accent: #3b82f6;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(70, 91, 76, 0.08);
+  --shadow-card-hover: 0 8px 32px rgba(70, 91, 76, 0.14);
+  --shadow-primary: 0 8px 24px rgba(70, 91, 76, 0.25);
+  --shadow-error: 0 8px 20px rgba(186, 26, 26, 0.25);
+
+  /* Animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delay-1: float 5s ease-in-out 1s infinite;
+  --animate-float-delay-2: float 7s ease-in-out 2s infinite;
+  --animate-float-delay-3: float 6s ease-in-out 3s infinite;
+}
+
+/* ── Keyframes ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* ── Global base ── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-inter), sans-serif;
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+  }
+
+  /* Dark mode body */
+  html.dark body {
+    background-color: #1a1f1b;
+    color: #e3e2e0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-manrope), sans-serif;
+  }
+}
+
+/* ── Utilities ── */
+@layer utilities {
+  .font-manrope {
+    font-family: var(--font-manrope), sans-serif;
+  }
+
+  .font-inter {
+    font-family: var(--font-inter), sans-serif;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .shadow-primary {
+    box-shadow: var(--shadow-primary);
+  }
+
+  .animate-float {
+    animation: var(--animate-float);
+  }
+
+  .animate-float-delay-1 {
+    animation: var(--animate-float-delay-1);
+  }
+
+  .animate-float-delay-2 {
+    animation: var(--animate-float-delay-2);
+  }
+
+  .animate-float-delay-3 {
+    animation: var(--animate-float-delay-3);
+  }
+
+  /* Dark mode overrides for surfaces */
+  html.dark .bg-surface-container-low {
+    background-color: #222823 !important;
+  }
+
+  html.dark .bg-white {
+    background-color: #2a312b !important;
+  }
+
+  html.dark .bg-surface {
+    background-color: #1a1f1b !important;
+  }
+
+  html.dark .text-on-surface {
+    color: #e3e2e0 !important;
+  }
+
+  html.dark .text-on-surface-variant {
+    color: #c3c8c1 !important;
+  }
+
+  html.dark .border-outline-variant\/30 {
+    border-color: rgba(115, 120, 115, 0.3) !important;
+  }
+}
