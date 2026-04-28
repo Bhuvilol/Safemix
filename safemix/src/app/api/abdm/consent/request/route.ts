@@ -3,8 +3,8 @@ import { getAbdmConfig } from "@/lib/abdmConfig";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { defaultConsentWindowDays } from "@/lib/abdm";
 
-async function getAbdmAccessToken(baseUrl: string, clientId: string, clientSecret: string): Promise<string> {
-  const tokenUrl = `${baseUrl.replace(/\/$/, "")}/v1/auth/token`;
+async function getAbdmAccessToken(baseUrl: string, tokenPath: string, tokenField: string, clientId: string, clientSecret: string): Promise<string> {
+  const tokenUrl = `${baseUrl.replace(/\/$/, "")}${tokenPath.startsWith("/") ? tokenPath : `/${tokenPath}`}`;
   const resp = await fetch(tokenUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -12,10 +12,10 @@ async function getAbdmAccessToken(baseUrl: string, clientId: string, clientSecre
     cache: "no-store",
   });
   const json = await resp.json().catch(() => ({}));
-  if (!resp.ok || !json?.accessToken) {
+  if (!resp.ok || !json?.[tokenField]) {
     throw new Error(`ABDM auth failed: ${json?.error || resp.statusText}`);
   }
-  return String(json.accessToken);
+  return String(json[tokenField]);
 }
 
 async function sendConsentRequestToAbdm(args: {
@@ -27,8 +27,9 @@ async function sendConsentRequestToAbdm(args: {
   hiTypes: string[];
   from: string;
   to: string;
+  consentRequestPath: string;
 }) {
-  const consentUrl = `${args.baseUrl.replace(/\/$/, "")}/v1/consents/requests`;
+  const consentUrl = `${args.baseUrl.replace(/\/$/, "")}${args.consentRequestPath.startsWith("/") ? args.consentRequestPath : `/${args.consentRequestPath}`}`;
   const resp = await fetch(consentUrl, {
     method: "POST",
     headers: {
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
       hiTypes,
       from: win.from,
       to: win.to,
-      status: "requested",
+      status: cfg.enabled ? "requested" : "local_requested",
       mode: cfg.mode,
       callbackUrl: cfg.callbackUrl,
       createdAt: Date.now(),
@@ -85,8 +86,26 @@ export async function POST(req: NextRequest) {
     const db = getAdminDb();
     await db.collection("users").doc(uid).collection("abdm_consents").doc(requestId).set(payload, { merge: true });
 
+    if (!cfg.enabled) {
+      await db.collection("users").doc(uid).collection("abdm_consents").doc(requestId).set(
+        {
+          status: "local_requested",
+          gatewayError: "ABDM gateway credentials are not configured yet. Consent request is queued locally.",
+          queuedAt: Date.now(),
+        },
+        { merge: true }
+      );
+      return NextResponse.json({
+        ok: true,
+        requestId,
+        status: "local_requested",
+        mode: cfg.mode,
+        warning: "ABDM gateway not configured. Request queued locally.",
+      });
+    }
+
     try {
-      const accessToken = await getAbdmAccessToken(cfg.baseUrl, cfg.clientId, cfg.clientSecret);
+      const accessToken = await getAbdmAccessToken(cfg.baseUrl, cfg.tokenPath, cfg.tokenField, cfg.clientId, cfg.clientSecret);
       const gatewayResp = await sendConsentRequestToAbdm({
         baseUrl: cfg.baseUrl,
         accessToken,
@@ -96,17 +115,14 @@ export async function POST(req: NextRequest) {
         hiTypes,
         from: win.from,
         to: win.to,
+        consentRequestPath: cfg.consentRequestPath,
       });
 
       await db.collection("users").doc(uid).collection("abdm_consents").doc(requestId).set(
         {
           status: "sent_to_gateway",
           gatewayRequestAt: Date.now(),
-          gatewayAckId: String(
-            gatewayResp.requestId ??
-            gatewayResp.consentRequestId ??
-            requestId
-          ),
+          gatewayAckId: String(gatewayResp[cfg.consentAckField] ?? gatewayResp.requestId ?? gatewayResp.consentRequestId ?? requestId),
           gatewayPayload: gatewayResp,
         },
         { merge: true }

@@ -229,6 +229,7 @@ function PrivacyPanel({ uid, onAccountDeleted }: { uid: string | null; onAccount
   const [abdmLoading, setAbdmLoading] = useState(false);
   const [abdmError, setAbdmError] = useState<string | null>(null);
   const [abdmItems, setAbdmItems] = useState<Array<Record<string, any>>>([]);
+  const [abdmWarning, setAbdmWarning] = useState<string | null>(null);
 
   const handleExport = async () => {
     if (!uid) return;
@@ -288,6 +289,7 @@ function PrivacyPanel({ uid, onAccountDeleted }: { uid: string | null; onAccount
     if (!uid) return;
     setAbdmLoading(true);
     setAbdmError(null);
+    setAbdmWarning(null);
     try {
       const res = await fetch("/api/abdm/consent/request", {
         method: "POST",
@@ -301,6 +303,7 @@ function PrivacyPanel({ uid, onAccountDeleted }: { uid: string | null; onAccount
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to request consent");
+      if (json.warning) setAbdmWarning(String(json.warning));
       await refreshAbdm();
     } catch (e) {
       setAbdmError((e as Error).message);
@@ -340,6 +343,7 @@ function PrivacyPanel({ uid, onAccountDeleted }: { uid: string | null; onAccount
           <button onClick={refreshAbdm} className="px-3 py-1.5 rounded-lg text-xs border border-[#d7e0d9] bg-white">Refresh status</button>
         </div>
         {abdmError && <p className="text-xs text-red-600">{abdmError}</p>}
+        {abdmWarning && <p className="text-xs text-amber-700">{abdmWarning}</p>}
         {abdmItems.length > 0 && (
           <div className="space-y-2">
             {abdmItems.slice(0, 5).map((it) => (

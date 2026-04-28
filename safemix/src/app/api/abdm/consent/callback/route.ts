@@ -20,6 +20,15 @@ export async function POST(req: NextRequest) {
     if (!ok) {
       return NextResponse.json({ error: "invalid signature" }, { status: 401 });
     }
+    const tsHeader = req.headers.get("x-abdm-timestamp");
+    if (!tsHeader || !/^\d+$/.test(tsHeader)) {
+      return NextResponse.json({ error: "missing/invalid timestamp header" }, { status: 401 });
+    }
+    const ts = Number(tsHeader);
+    const maxSkewMs = Number(process.env.ABDM_WEBHOOK_MAX_SKEW_MS ?? 5 * 60 * 1000);
+    if (Math.abs(Date.now() - ts) > maxSkewMs) {
+      return NextResponse.json({ error: "stale callback timestamp" }, { status: 401 });
+    }
 
     const body = JSON.parse(raw) as {
       uid: string;
@@ -35,6 +44,13 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getAdminDb();
+    const replayRef = db.collection("abdm_callback_replay_guard").doc(`${body.requestId}:${body.status}:${ts}`);
+    const replaySnap = await replayRef.get();
+    if (replaySnap.exists) {
+      return NextResponse.json({ ok: true, replay: true });
+    }
+    await replayRef.set({ createdAt: Date.now() });
+
     const ref = db.collection("users").doc(body.uid).collection("abdm_consents").doc(body.requestId);
     const now = Date.now();
 
