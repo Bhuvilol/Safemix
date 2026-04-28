@@ -40,7 +40,7 @@ const cols = {
 
 export default function Footer() {
   return (
-    <footer className="bg-[#F8F8F4] dark:bg-[#0f1410] border-t border-[#c3c8c1]/30 dark:border-white/10">
+    <footer className="bg-[#F8F8F4] border-t border-[#c3c8c1]/30">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
 
@@ -49,13 +49,13 @@ export default function Footer() {
             <Link href="/" className="inline-block mb-5">
               <SafeMixLogo size={32} textSize="text-lg" />
             </Link>
-            <p className="text-sm text-[#6b7b70] dark:text-[#7a9080] leading-relaxed mb-6 max-w-[220px]">
+            <p className="text-sm text-[#6b7b70] leading-relaxed mb-6 max-w-[220px]">
               India&apos;s first AI-powered medication safety platform. Know before you take.
             </p>
             <div className="flex gap-3">
               {[XIcon, LinkedinIcon, GithubIcon].map((Icon, i) => (
                 <a key={i} href="#"
-                  className="w-9 h-9 rounded-full bg-[#e8ede9] dark:bg-[#1e2820] flex items-center justify-center text-[#5E7464] dark:text-[#9ab0a0] hover:bg-[#5E7464] hover:text-white dark:hover:bg-[#5E7464] transition-all duration-200"
+                  className="w-9 h-9 rounded-full bg-[#e8ede9] flex items-center justify-center text-[#5E7464] hover:bg-[#5E7464] hover:text-white transition-all duration-200"
                 >
                   <Icon />
                 </a>
@@ -66,13 +66,13 @@ export default function Footer() {
           {/* Link cols */}
           {Object.entries(cols).map(([title, links]) => (
             <div key={title}>
-              <h4 className="text-xs font-bold text-[#42594A] dark:text-[#7ab090] uppercase tracking-widest mb-5">
+              <h4 className="text-xs font-bold text-[#42594A] uppercase tracking-widest mb-5">
                 {title}
               </h4>
               <ul className="space-y-3">
                 {links.map((l) => (
                   <li key={l.label}>
-                    <Link href={l.href} className="text-sm text-[#6b7b70] dark:text-[#7a9080] hover:text-[#42594A] dark:hover:text-[#b5ccba] transition-colors">
+                    <Link href={l.href} className="text-sm text-[#6b7b70] hover:text-[#42594A] transition-colors">
                       {l.label}
                     </Link>
                   </li>
@@ -83,11 +83,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-8 border-t border-[#c3c8c1]/30 dark:border-white/10">
-          <p className="text-xs text-[#8a9e90] dark:text-[#607060]">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-8 border-t border-[#c3c8c1]/30">
+          <p className="text-xs text-[#8a9e90]">
             © 2026 SafeMix. Built for India.
           </p>
-          <div className="flex items-center gap-2 text-xs text-[#8a9e90] dark:text-[#607060]">
+          <div className="flex items-center gap-2 text-xs text-[#8a9e90]">
             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
             All systems operational
           </div>

@@ -208,7 +208,7 @@ export default function RemindersPage() {
     taken:    { dot: "bg-emerald-500", label: "Taken",    labelCls: "bg-emerald-100 text-emerald-700", card: "opacity-75" },
     missed:   { dot: "bg-red-500",     label: "Missed",   labelCls: "bg-red-100 text-red-700",         card: "opacity-75" },
     due_soon: { dot: "bg-amber-500 animate-pulse", label: "Due Now", labelCls: "bg-amber-100 text-amber-700", card: "" },
-    upcoming: { dot: "bg-[#e8ede9] dark:bg-[#2a3430]", label: "Upcoming", labelCls: "bg-[#f0f4f1] text-[#7a9080]", card: "" },
+    upcoming: { dot: "bg-[#e8ede9] ", label: "Upcoming", labelCls: "bg-[#f0f4f1] text-[#7a9080]", card: "" },
   };
 
   return (
@@ -217,7 +217,7 @@ export default function RemindersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-manrope font-bold text-2xl text-[#1a2820] dark:text-white">Reminders</h1>
+          <h1 className="font-manrope font-bold text-2xl text-[#1a2820]">Reminders</h1>
           <p className="text-sm text-[#7a9080] mt-1">
             {totalCount === 0
               ? "No medicines in your regimen yet"
@@ -242,11 +242,7 @@ export default function RemindersPage() {
           const active = offset === selectedOffset;
           return (
             <button key={offset} onClick={() => setSelectedOffset(offset)}
-              className={`flex-shrink-0 w-16 p-3 rounded-2xl flex flex-col items-center justify-center border transition-all ${
-                active
-                  ? "bg-[#42594A] border-[#42594A] text-white scale-110 shadow-lg"
-                  : "bg-white dark:bg-[#1e2820] border-[#e0e8e2] dark:border-white/10 text-[#52615a] dark:text-[#9ab0a0] hover:border-[#5E7464]/40 hover:scale-105"
-              }`}>
+              className={`flex-shrink-0 w-16 p-3 rounded-2xl flex flex-col items-center justify-center border transition-all ${ active ? "bg-[#42594A] border-[#42594A] text-white scale-110 shadow-lg" : "bg-white border-[#e0e8e2] text-[#52615a] hover:border-[#5E7464]/40 hover:scale-105" }`}>
               <span className="text-[10px] font-bold uppercase mb-1">{d.toLocaleDateString("en-IN", { weekday: "short" })}</span>
               <span className="text-lg font-bold font-manrope">{d.getDate()}</span>
               {offset === 0 && !active && <span className="w-1.5 h-1.5 rounded-full bg-[#5E7464] mt-1" />}
@@ -258,9 +254,9 @@ export default function RemindersPage() {
       {/* ── Current Medicines + AI Interactions Widget ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Left: Current Medicines */}
-        <div className="bg-white dark:bg-[#1e2820] rounded-2xl border border-[#e0e8e2] dark:border-white/10 p-5">
+        <div className="bg-white rounded-2xl border border-[#e0e8e2] p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-[#1a2820] dark:text-white">Current Medicines</h3>
+            <h3 className="text-sm font-bold text-[#1a2820]">Current Medicines</h3>
             <Link href="/dashboard/add-medicine"
               className="text-xs font-semibold text-[#5E7464] hover:underline">+ Add</Link>
           </div>
@@ -269,13 +265,13 @@ export default function RemindersPage() {
           ) : (
             <div className="space-y-1">
               {regimen.map((m) => (
-                <div key={m.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#f8faf8] dark:hover:bg-[#141a15] transition-colors group">
+                <div key={m.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#f8faf8] transition-colors group">
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                     style={{ background: systemColor[m.system] || "#9ab0a0" }}>
                     {m.name[0]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#1a2820] dark:text-white truncate">{m.name}</p>
+                    <p className="text-sm font-semibold text-[#1a2820] truncate">{m.name}</p>
                     <p className="text-[10px] text-[#9ab0a0] capitalize">
                       {m.timing
                         ? m.timing.replace(" (empty stomach)", "").replace(" (after meal)", "").replace(" (before bed)", "")
@@ -293,10 +289,10 @@ export default function RemindersPage() {
         </div>
 
         {/* Right: AI Interactions */}
-        <div className="bg-white dark:bg-[#1e2820] rounded-2xl border border-[#e0e8e2] dark:border-white/10 p-5">
+        <div className="bg-white rounded-2xl border border-[#e0e8e2] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-[#1a2820] dark:text-white">AI Interactions</h3>
+              <h3 className="text-sm font-bold text-[#1a2820]">AI Interactions</h3>
               <span className="flex items-center gap-1 text-[9px] font-black px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />Live
               </span>
@@ -320,10 +316,10 @@ export default function RemindersPage() {
                   green:  { dot: "bg-emerald-500",badge: "bg-emerald-100 text-emerald-600 border-emerald-200", label: "Safe" },
                 }[v.verdict];
                 return (
-                  <div key={v.id} className="flex items-center gap-3 py-2 border-b border-[#f0f4f1] dark:border-white/5 last:border-0">
+                  <div key={v.id} className="flex items-center gap-3 py-2 border-b border-[#f0f4f1] last:border-0">
                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${vedge.dot}`} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-[#1a2820] dark:text-white truncate">{v.medicines.join(" + ")}</p>
+                      <p className="text-xs font-semibold text-[#1a2820] truncate">{v.medicines.join(" + ")}</p>
                       <p className="text-[10px] text-[#9ab0a0]">{agoStr}</p>
                     </div>
                     <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border flex-shrink-0 ${vedge.badge}`}>
@@ -339,12 +335,12 @@ export default function RemindersPage() {
 
       {/* Adherence bar */}
       {totalCount > 0 && (
-        <div className="bg-white dark:bg-[#1e2820] rounded-2xl border border-[#e0e8e2] dark:border-white/10 p-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] mb-2">
+        <div className="bg-white rounded-2xl border border-[#e0e8e2] p-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-[#52615a] mb-2">
             <span>{dateLabel} Adherence</span>
-            <span className="text-[#42594A] dark:text-[#b5ccba]">{takenCount}/{totalCount} doses · {adherencePct}%</span>
+            <span className="text-[#42594A]">{takenCount}/{totalCount} doses · {adherencePct}%</span>
           </div>
-          <div className="h-2.5 bg-[#f0f4f1] dark:bg-white/10 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-[#f0f4f1] rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-[#5E7464] to-[#42594A] rounded-full transition-all duration-500"
               style={{ width: `${adherencePct}%` }} />
           </div>
@@ -353,11 +349,11 @@ export default function RemindersPage() {
 
       {/* Empty state */}
       {totalCount === 0 && (
-        <div className="bg-white dark:bg-[#1e2820] rounded-3xl border border-[#e0e8e2] dark:border-white/10 p-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#f0f8f2] dark:bg-[#1a2a1e] flex items-center justify-center mx-auto mb-5">
+        <div className="bg-white rounded-3xl border border-[#e0e8e2] p-12 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#f0f8f2] flex items-center justify-center mx-auto mb-5">
             <Pill className="w-8 h-8 text-[#c3d4c8]" />
           </div>
-          <h3 className="font-bold text-[#1a2820] dark:text-white mb-2">No reminders yet</h3>
+          <h3 className="font-bold text-[#1a2820] mb-2">No reminders yet</h3>
           <p className="text-sm text-[#7a9080] mb-6">Add a medicine to your regimen and reminders will appear here automatically based on your dose schedule.</p>
           <Link href="/dashboard/add-medicine"
             className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl"
@@ -369,20 +365,20 @@ export default function RemindersPage() {
 
       {/* Timeline */}
       {totalCount > 0 && (
-        <div className="bg-white dark:bg-[#1e2820] rounded-3xl border border-[#e0e8e2] dark:border-white/10 p-6 md:p-8">
+        <div className="bg-white rounded-3xl border border-[#e0e8e2] p-6 md:p-8">
           <div className="flex items-center gap-4 mb-8">
-            <h2 className="font-manrope font-bold text-lg text-[#1a2820] dark:text-white">{dateLabel}&apos;s Schedule</h2>
-            <div className="h-px flex-1 bg-[#f0f4f1] dark:bg-white/5" />
+            <h2 className="font-manrope font-bold text-lg text-[#1a2820]">{dateLabel}&apos;s Schedule</h2>
+            <div className="h-px flex-1 bg-[#f0f4f1]" />
             <span className="text-xs text-[#9ab0a0]">{totalCount} reminder{totalCount !== 1 ? "s" : ""}</span>
           </div>
 
-          <div className="space-y-6 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-px before:bg-[#f0f4f1] dark:before:bg-white/5">
+          <div className="space-y-6 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-px before:bg-[#f0f4f1]">
             {reminders.map((r) => {
               const s = STATUS[r.status];
               return (
                 <div key={r.id} className={`relative flex items-start gap-5 group transition-opacity ${s.card}`}>
                   {/* Timeline dot */}
-                  <div className={`w-9 h-9 rounded-full flex-shrink-0 z-10 border-4 border-white dark:border-[#1e2820] flex items-center justify-center ${s.dot}`}>
+                  <div className={`w-9 h-9 rounded-full flex-shrink-0 z-10 border-4 border-white flex items-center justify-center ${s.dot}`}>
                     {r.status === "taken"    ? <Check className="w-4 h-4 text-white" /> :
                      r.status === "missed"   ? <X className="w-4 h-4 text-white" /> :
                      r.status === "due_soon" ? <Bell className="w-4 h-4 text-white" /> :
@@ -390,7 +386,7 @@ export default function RemindersPage() {
                   </div>
 
                   {/* Card */}
-                  <div className="flex-1 p-5 rounded-2xl border border-[#e0e8e2] dark:border-white/10 bg-[#F8F8F4] dark:bg-[#141a15] hover:border-[#5E7464]/30 transition-all">
+                  <div className="flex-1 p-5 rounded-2xl border border-[#e0e8e2] bg-[#F8F8F4] hover:border-[#5E7464]/30 transition-all">
                     <div className="flex items-start justify-between mb-3">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -401,7 +397,7 @@ export default function RemindersPage() {
                           </span>
                           <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${s.labelCls}`}>{s.label}</span>
                         </div>
-                        <h3 className="font-bold text-base text-[#1a2820] dark:text-white">{r.medName}</h3>
+                        <h3 className="font-bold text-base text-[#1a2820]">{r.medName}</h3>
                         {r.dosage && <p className="text-xs text-[#9ab0a0]">{r.dosage}</p>}
                       </div>
                     </div>
@@ -415,12 +411,12 @@ export default function RemindersPage() {
                         </button>
                         {r.status === "due_soon" && (
                           <button onClick={() => snoozeReminder(r.id)}
-                            className="px-4 py-2.5 rounded-xl border border-[#e0e8e2] dark:border-white/10 text-xs font-bold text-[#52615a] dark:text-[#9ab0a0] hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all">
+                            className="px-4 py-2.5 rounded-xl border border-[#e0e8e2] text-xs font-bold text-[#52615a] hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all">
                             Snooze +30m
                           </button>
                         )}
                         <button onClick={() => markMissed(r.id)}
-                          className="px-4 py-2.5 rounded-xl border border-[#e0e8e2] dark:border-white/10 text-xs font-bold text-red-500 hover:bg-red-50 transition-all">
+                          className="px-4 py-2.5 rounded-xl border border-[#e0e8e2] text-xs font-bold text-red-500 hover:bg-red-50 transition-all">
                           Skip
                         </button>
                       </div>
@@ -460,37 +456,37 @@ export default function RemindersPage() {
       {/* Add Reminder Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#1e2820] rounded-3xl w-full max-w-md border border-[#e0e8e2] dark:border-white/10 shadow-2xl">
-            <div className="p-6 border-b border-[#f0f4f1] dark:border-white/10 flex items-center justify-between">
-              <h3 className="font-manrope font-bold text-lg text-[#1a2820] dark:text-white">Add One-time Reminder</h3>
-              <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-full hover:bg-[#f0f5f1] dark:hover:bg-[#2a3430] flex items-center justify-center text-[#9ab0a0]">
+          <div className="bg-white rounded-3xl w-full max-w-md border border-[#e0e8e2] shadow-2xl">
+            <div className="p-6 border-b border-[#f0f4f1] flex items-center justify-between">
+              <h3 className="font-manrope font-bold text-lg text-[#1a2820]">Add One-time Reminder</h3>
+              <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-full hover:bg-[#f0f5f1] flex items-center justify-center text-[#9ab0a0]">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="p-3 rounded-xl bg-[#f0f8f2] dark:bg-[#1a2a1e] border border-[#b7eb8f]/30 flex items-start gap-2">
+              <div className="p-3 rounded-xl bg-[#f0f8f2] border border-[#b7eb8f]/30 flex items-start gap-2">
                 <Info className="w-4 h-4 text-[#5E7464] flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-[#52615a] dark:text-[#9ab0a0]">
+                <p className="text-xs text-[#52615a]">
                   Medicines added to your regimen already have auto-generated reminders above.
                   Use this for a one-off reminder only.
                 </p>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Medicine / Note</label>
+                <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Medicine / Note</label>
                 <input type="text"
                   list="regimen-meds"
                   placeholder="e.g. Paracetamol 500mg"
                   value={newMed}
                   onChange={(e) => setNewMed(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-[#F8F8F4] dark:bg-[#141a15] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] text-sm" />
+                  className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] bg-[#F8F8F4] text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] text-sm" />
                 <datalist id="regimen-meds">
                   {regimen.map((m) => <option key={m.id} value={m.name} />)}
                 </datalist>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Time</label>
+                <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Time</label>
                 <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-[#F8F8F4] dark:bg-[#141a15] text-[#1a2820] dark:text-white focus:outline-none focus:border-[#5E7464] text-sm" />
+                  className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] bg-[#F8F8F4] text-[#1a2820] focus:outline-none focus:border-[#5E7464] text-sm" />
               </div>
               <button onClick={addManualReminder}
                 className="w-full py-3.5 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-all hover:shadow-lg"

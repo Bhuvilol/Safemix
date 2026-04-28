@@ -29,7 +29,7 @@ export default function SecurityPage() {
       <main className="pt-[68px]">
 
         {/* Hero */}
-        <section className="relative py-28 overflow-hidden bg-[#F8F8F4] dark:bg-[#0f1410]">
+        <section className="relative py-28 overflow-hidden bg-[#F8F8F4]">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #3B82F6 0%, transparent 70%)" }} />
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #5E7464 0%, transparent 70%)" }} />
@@ -40,18 +40,18 @@ export default function SecurityPage() {
                 <span className="material-symbols-outlined text-base">security</span>
                 Security & Privacy
               </div>
-              <h1 className="font-manrope font-bold text-5xl lg:text-6xl text-[#1a2820] dark:text-white mb-6 leading-tight">
+              <h1 className="font-manrope font-bold text-5xl lg:text-6xl text-[#1a2820] mb-6 leading-tight">
                 Privacy Built Into <span className="text-[#5E7464]">Every Layer</span>
               </h1>
-              <p className="text-xl text-[#52615a] dark:text-[#9ab0a0] mb-12 leading-relaxed">
+              <p className="text-xl text-[#52615a] mb-12 leading-relaxed">
                 Your health data is sacred. SafeMix is designed from the ground up with privacy-first architecture, clinical-grade encryption, and full DPDP compliance.
               </p>
 
               {/* Trust badges */}
               <div className="flex flex-wrap justify-center gap-4">
                 {certifications.map((c) => (
-                  <div key={c.label} className="flex flex-col items-center bg-white dark:bg-[#1e2820] rounded-2xl px-8 py-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-[#e0e8e2] dark:border-white/10">
-                    <span className="font-manrope font-bold text-2xl text-[#42594A] dark:text-[#b5ccba]">{c.label}</span>
+                  <div key={c.label} className="flex flex-col items-center bg-white rounded-2xl px-8 py-5 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-[#e0e8e2]">
+                    <span className="font-manrope font-bold text-2xl text-[#42594A]">{c.label}</span>
                     <span className="text-xs text-[#7a9080] mt-1">{c.sub}</span>
                   </div>
                 ))}
@@ -61,26 +61,26 @@ export default function SecurityPage() {
         </section>
 
         {/* Cards */}
-        <section className="py-20 bg-white dark:bg-[#141a15]">
+        <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
             <div className="text-center mb-14">
-              <h2 className="font-manrope font-bold text-4xl text-[#1a2820] dark:text-white mb-3">
+              <h2 className="font-manrope font-bold text-4xl text-[#1a2820] mb-3">
                 8 Layers of Protection
               </h2>
-              <p className="text-[#52615a] dark:text-[#9ab0a0] text-lg">
+              <p className="text-[#52615a] text-lg">
                 Security isn&apos;t a feature — it&apos;s the foundation.
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
               {cards.map((c) => (
                 <div key={c.title}
-                  className="bg-[#F8F8F4] dark:bg-[#1e2820] rounded-2xl p-7 border border-[#e0e8e2] dark:border-white/10 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.10)] transition-all duration-300"
+                  className="bg-[#F8F8F4] rounded-2xl p-7 border border-[#e0e8e2] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.10)] transition-all duration-300"
                 >
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: `${c.color}18` }}>
                     <span className="material-symbols-outlined" style={{ color: c.color }}>{c.icon}</span>
                   </div>
-                  <h3 className="font-manrope font-semibold text-lg text-[#1a2820] dark:text-white mb-3">{c.title}</h3>
-                  <p className="text-sm text-[#6b7b70] dark:text-[#7a9080] leading-relaxed">{c.desc}</p>
+                  <h3 className="font-manrope font-semibold text-lg text-[#1a2820] mb-3">{c.title}</h3>
+                  <p className="text-sm text-[#6b7b70] leading-relaxed">{c.desc}</p>
                 </div>
               ))}
             </div>
@@ -88,10 +88,10 @@ export default function SecurityPage() {
         </section>
 
         {/* CTA */}
-        <section className="py-20 bg-[#F8F8F4] dark:bg-[#0f1410]">
+        <section className="py-20 bg-[#F8F8F4]">
           <div className="max-w-2xl mx-auto px-6 text-center">
-            <h2 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-4">Your Data, Your Control</h2>
-            <p className="text-[#52615a] dark:text-[#9ab0a0] mb-8">Join 500,000+ Indians who trust SafeMix with their health data.</p>
+            <h2 className="font-manrope font-bold text-3xl text-[#1a2820] mb-4">Your Data, Your Control</h2>
+            <p className="text-[#52615a] mb-8">Join 500,000+ Indians who trust SafeMix with their health data.</p>
             <Link href="/signup" className="inline-flex items-center gap-2 text-white text-sm font-semibold px-8 py-4 rounded-full shadow-[0_4px_20px_rgba(94,116,100,0.3)] transition-all hover:shadow-[0_8px_30px_rgba(94,116,100,0.4)]" style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
               Start for Free — No Credit Card
             </Link>

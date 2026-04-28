@@ -10,7 +10,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8F8F4] dark:bg-[#0f1410]">
+    <div className="flex h-screen overflow-hidden bg-[#F8F8F4]">
       {/* Sidebar - hidden on mobile via native bottom nav */}
       <div className="hidden md:block">
         <Sidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />

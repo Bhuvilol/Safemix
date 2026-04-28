@@ -15,8 +15,7 @@ export default function SafeMixLogo({ size = 36, textSize = "text-xl", hideText 
                     is visible and the black bg blends into the circle fill
       */}
       <div
-        className="flex-shrink-0 rounded-full overflow-hidden
-                   bg-transparent dark:bg-[#dceae0]"
+        className="flex-shrink-0 rounded-full overflow-hidden bg-transparent"
         style={{ width: size, height: size }}
       >
         <Image
@@ -32,7 +31,7 @@ export default function SafeMixLogo({ size = 36, textSize = "text-xl", hideText 
 
       {!hideText && (
         <span
-          className={`font-bold tracking-tight text-[#42594A] dark:text-[#b5ccba] ${textSize}`}
+          className={`font-bold tracking-tight text-[#42594A] ${textSize}`}
           style={{ fontFamily: "Manrope, Inter, sans-serif", letterSpacing: "-0.02em" }}
         >
           SafeMix

@@ -85,20 +85,20 @@ export default function FloatingAIAssistant() {
 
       {/* Panel */}
       {open && (
-        <div className="fixed bottom-0 right-0 md:bottom-6 md:right-6 z-50 w-full md:w-96 h-[480px] md:h-[520px] bg-white dark:bg-[#1e2820] rounded-t-3xl md:rounded-3xl shadow-2xl border border-[#e0e8e2] dark:border-white/10 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-0 right-0 md:bottom-6 md:right-6 z-50 w-full md:w-96 h-[480px] md:h-[520px] bg-white rounded-t-3xl md:rounded-3xl shadow-2xl border border-[#e0e8e2] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#f0f4f1] dark:border-white/10">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#f0f4f1]">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#5E7464] to-[#42594A] flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-bold text-[#1a2820] dark:text-white">SafeMix AI</p>
+                <p className="text-sm font-bold text-[#1a2820]">SafeMix AI</p>
                 <p className="text-[10px] text-[#7a9080]">Medication safety assistant</p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="w-7 h-7 rounded-full bg-[#f0f4f1] dark:bg-[#2a3430] flex items-center justify-center hover:bg-[#e0e8e2] transition-all">
+            <button onClick={() => setOpen(false)} className="w-7 h-7 rounded-full bg-[#f0f4f1] flex items-center justify-center hover:bg-[#e0e8e2] transition-all">
               <X className="w-3.5 h-3.5 text-[#52615a]" />
             </button>
           </div>
@@ -111,7 +111,7 @@ export default function FloatingAIAssistant() {
                 <div className="grid grid-cols-2 gap-2">
                   {STARTERS.map(s => (
                     <button key={s} onClick={() => send(s)}
-                      className="text-left text-xs p-2.5 rounded-xl border border-[#e8f0ea] bg-[#F8F8F4] dark:bg-[#2a3430] dark:border-white/10 text-[#52615a] dark:text-[#9ab0a0] hover:border-[#5E7464] transition-all">
+                      className="text-left text-xs p-2.5 rounded-xl border border-[#e8f0ea] bg-[#F8F8F4] text-[#52615a] hover:border-[#5E7464] transition-all">
                       {s}
                     </button>
                   ))}
@@ -120,18 +120,14 @@ export default function FloatingAIAssistant() {
             )}
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
-                  m.role === "user"
-                    ? "bg-[#5E7464] text-white rounded-br-md"
-                    : "bg-[#F4F7F5] dark:bg-[#2a3430] text-[#1a2820] dark:text-white rounded-bl-md border border-[#e8f0ea] dark:border-white/10"
-                }`}>
+                <div className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${ m.role === "user" ? "bg-[#5E7464] text-white rounded-br-md" : "bg-[#F4F7F5] text-[#1a2820] rounded-bl-md border border-[#e8f0ea] " }`}>
                   {m.text}
                 </div>
               </div>
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-[#F4F7F5] dark:bg-[#2a3430] border border-[#e8f0ea] dark:border-white/10 px-3.5 py-2.5 rounded-2xl rounded-bl-md flex items-center gap-1.5">
+                <div className="bg-[#F4F7F5] border border-[#e8f0ea] px-3.5 py-2.5 rounded-2xl rounded-bl-md flex items-center gap-1.5">
                   <Loader2 className="w-3 h-3 animate-spin text-[#5E7464]" />
                   <span className="text-xs text-[#7a9080]">Thinking…</span>
                 </div>
@@ -141,18 +137,18 @@ export default function FloatingAIAssistant() {
           </div>
 
           {/* Input */}
-          <div className="p-3 border-t border-[#f0f4f1] dark:border-white/10 flex items-center gap-2">
+          <div className="p-3 border-t border-[#f0f4f1] flex items-center gap-2">
             <input
               type="text"
               placeholder="Ask about your medicines…"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && send(input)}
-              className="flex-1 text-xs px-3.5 py-2.5 rounded-xl border border-[#e0e8e2] dark:border-white/10 bg-[#F8F8F4] dark:bg-[#2a3430] text-[#1a2820] dark:text-white outline-none focus:border-[#5E7464] transition-all"
+              className="flex-1 text-xs px-3.5 py-2.5 rounded-xl border border-[#e0e8e2] bg-[#F8F8F4] text-[#1a2820] outline-none focus:border-[#5E7464] transition-all"
             />
             <button
               onClick={listening ? stopVoice : startVoice}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${listening ? "bg-red-100 text-red-500" : "bg-[#F4F7F5] dark:bg-[#2a3430] text-[#7a9080] hover:text-[#5E7464]"}`}>
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${listening ? "bg-red-100 text-red-500" : "bg-[#F4F7F5] text-[#7a9080] hover:text-[#5E7464]"}`}>
               {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
             <button

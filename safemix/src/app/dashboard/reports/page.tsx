@@ -53,10 +53,10 @@ export default function ReportsPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-manrope font-bold text-2xl text-[#1a2820] dark:text-white">Reports</h1>
+          <h1 className="font-manrope font-bold text-2xl text-[#1a2820]">Reports</h1>
           <p className="text-sm text-[#7a9080] mt-1">Your medicine interaction analysis & history</p>
         </div>
-        <button className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#e0e8e2] dark:border-white/15 text-sm font-medium text-[#52615a] dark:text-[#9ab0a0] hover:bg-[#f4f8f5] dark:hover:bg-[#1e2820] transition-colors">
+        <button className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#e0e8e2] text-sm font-medium text-[#52615a] hover:bg-[#f4f8f5] transition-colors">
           <Download className="w-4 h-4" />
           Export PDF
         </button>
@@ -77,14 +77,10 @@ export default function ReportsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-[#f0f5f1] dark:bg-[#1e2820] rounded-2xl">
+      <div className="flex gap-1 p-1 bg-[#f0f5f1] rounded-2xl">
         {tabs.map((t, i) => (
           <button key={t} onClick={() => setTab(i)}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-              tab === i
-                ? "bg-white dark:bg-[#2a3430] text-[#42594A] dark:text-[#b5ccba] shadow-sm"
-                : "text-[#7a9080] hover:text-[#42594A] dark:hover:text-[#9ab0a0]"
-            }`}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all ${ tab === i ? "bg-white text-[#42594A] shadow-sm" : "text-[#7a9080] hover:text-[#42594A] " }`}
           >
             {t}
           </button>
@@ -98,7 +94,7 @@ export default function ReportsPage() {
             const c = severityConfig[ix.severity];
             const isOpen = expanded === i;
             return (
-              <div key={i} className="bg-white dark:bg-[#1e2820] rounded-2xl border border-[#e0e8e2] dark:border-white/10 overflow-hidden hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-shadow">
+              <div key={i} className="bg-white rounded-2xl border border-[#e0e8e2] overflow-hidden hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-shadow">
                 <button onClick={() => setExpanded(isOpen ? null : i)} className="w-full flex items-center gap-4 p-5 text-left">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: c.badgeBg }}>
                     <c.icon className="w-5 h-5" style={{ color: c.text }} />
@@ -107,7 +103,7 @@ export default function ReportsPage() {
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       {ix.pair.map((p, pi) => (
                         <span key={pi}>
-                          <span className="text-sm font-semibold text-[#1a2820] dark:text-white">{p}</span>
+                          <span className="text-sm font-semibold text-[#1a2820]">{p}</span>
                           {pi < ix.pair.length - 1 && <span className="text-[#9ab0a0] mx-1.5">×</span>}
                         </span>
                       ))}
@@ -120,7 +116,7 @@ export default function ReportsPage() {
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 border-t border-[#f0f4f1] dark:border-white/5 pt-4" style={{ background: `${c.bg}80` }}>
+                  <div className="px-5 pb-5 border-t border-[#f0f4f1] pt-4" style={{ background: `${c.bg}80` }}>
                     <p className="text-sm mb-3" style={{ color: c.text }}><strong>Why risky:</strong> {ix.why}</p>
                     <p className="text-sm mb-4" style={{ color: c.text }}><strong>Suggestion:</strong> {ix.suggestion}</p>
                     <div className="flex gap-3">
@@ -141,10 +137,10 @@ export default function ReportsPage() {
 
       {tab !== 0 && (
         <div className="text-center py-20 text-[#9ab0a0]">
-          <div className="w-16 h-16 rounded-2xl bg-[#f0f5f1] dark:bg-[#1e2820] flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[#f0f5f1] flex items-center justify-center mx-auto mb-4">
             <span className="material-symbols-outlined text-2xl text-[#c3d4c8]">inbox</span>
           </div>
-          <p className="font-semibold text-[#52615a] dark:text-[#7a9080]">No data yet</p>
+          <p className="font-semibold text-[#52615a]">No data yet</p>
           <p className="text-sm mt-1">Records will appear here as you use SafeMix</p>
         </div>
       )}

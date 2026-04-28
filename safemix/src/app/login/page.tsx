@@ -101,7 +101,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F8F8F4] dark:bg-[#0f1410]">
+    <div className="min-h-screen flex bg-[#F8F8F4]">
 
       {/* Hidden reCAPTCHA anchor */}
       <div id="recaptcha-container" ref={recaptchaRef} />
@@ -160,8 +160,8 @@ export default function LoginPage() {
           {step === "choose" && (
             <>
               <div className="mb-8">
-                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Welcome back</h1>
-                <p className="text-[#52615a] dark:text-[#9ab0a0]">Sign in to your SafeMix account</p>
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] mb-2">Welcome back</h1>
+                <p className="text-[#52615a]">Sign in to your SafeMix account</p>
               </div>
 
               {error && (
@@ -174,7 +174,7 @@ export default function LoginPage() {
               <div className="space-y-3">
                 {/* Google */}
                 <button onClick={handleGoogle} disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white font-semibold text-sm hover:border-[#5E7464]/50 hover:bg-[#f4f8f5] dark:hover:bg-[#2a3430] transition-all disabled:opacity-60">
+                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border-2 border-[#e0e8e2] bg-white text-[#1a2820] font-semibold text-sm hover:border-[#5E7464]/50 hover:bg-[#f4f8f5] transition-all disabled:opacity-60">
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-[#5E7464]/30 border-t-[#5E7464] rounded-full animate-spin" />
                   ) : (
@@ -184,20 +184,20 @@ export default function LoginPage() {
 
                 {/* Phone OTP */}
                 <button onClick={() => { setError(""); setStep("phone"); }} disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white font-semibold text-sm hover:border-[#5E7464]/50 hover:bg-[#f4f8f5] dark:hover:bg-[#2a3430] transition-all disabled:opacity-60">
+                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border-2 border-[#e0e8e2] bg-white text-[#1a2820] font-semibold text-sm hover:border-[#5E7464]/50 hover:bg-[#f4f8f5] transition-all disabled:opacity-60">
                   <Phone className="w-4 h-4 text-[#5E7464]" />
                   Continue with Phone OTP
                 </button>
               </div>
 
-              <div className="mt-6 p-4 rounded-xl bg-[#f0f8f2] dark:bg-[#1a2a1e] border border-[#b7eb8f]/30 flex items-start gap-2">
+              <div className="mt-6 p-4 rounded-xl bg-[#f0f8f2] border border-[#b7eb8f]/30 flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#5E7464] flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-[#52615a] dark:text-[#9ab0a0]">
+                <p className="text-xs text-[#52615a]">
                   Your sign-in is secured by Firebase Authentication. We never store passwords.
                 </p>
               </div>
 
-              <p className="text-center text-sm text-[#52615a] dark:text-[#9ab0a0] mt-8">
+              <p className="text-center text-sm text-[#52615a] mt-8">
                 Don&apos;t have an account?{" "}
                 <Link href="/signup" className="text-[#5E7464] font-semibold hover:underline">Create account</Link>
               </p>
@@ -213,8 +213,8 @@ export default function LoginPage() {
               </button>
 
               <div className="mb-8">
-                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Enter your number</h1>
-                <p className="text-[#52615a] dark:text-[#9ab0a0]">We&apos;ll send a 6-digit OTP to verify your identity.</p>
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] mb-2">Enter your number</h1>
+                <p className="text-[#52615a]">We&apos;ll send a 6-digit OTP to verify your identity.</p>
               </div>
 
               {error && (
@@ -226,11 +226,11 @@ export default function LoginPage() {
 
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">
+                  <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">
                     Mobile Number
                   </label>
-                  <div className="flex rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 overflow-hidden focus-within:border-[#5E7464] focus-within:ring-2 focus-within:ring-[#5E7464]/20 transition-all">
-                    <span className="px-4 py-3.5 bg-[#f0f8f2] dark:bg-[#1a2a1e] text-[#5E7464] font-bold text-sm border-r border-[#e0e8e2] dark:border-white/15 flex-shrink-0">
+                  <div className="flex rounded-xl border-2 border-[#e0e8e2] overflow-hidden focus-within:border-[#5E7464] focus-within:ring-2 focus-within:ring-[#5E7464]/20 transition-all">
+                    <span className="px-4 py-3.5 bg-[#f0f8f2] text-[#5E7464] font-bold text-sm border-r border-[#e0e8e2] flex-shrink-0">
                       +91
                     </span>
                     <input
@@ -239,7 +239,7 @@ export default function LoginPage() {
                       placeholder="98765 43210"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                      className="flex-1 px-4 py-3.5 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none text-sm"
+                      className="flex-1 px-4 py-3.5 bg-white text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none text-sm"
                     />
                   </div>
                 </div>
@@ -266,9 +266,9 @@ export default function LoginPage() {
               </button>
 
               <div className="mb-8">
-                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Enter OTP</h1>
-                <p className="text-[#52615a] dark:text-[#9ab0a0]">
-                  6-digit code sent to <span className="font-semibold text-[#1a2820] dark:text-white">+91 {phone}</span>
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] mb-2">Enter OTP</h1>
+                <p className="text-[#52615a]">
+                  6-digit code sent to <span className="font-semibold text-[#1a2820]">+91 {phone}</span>
                 </p>
               </div>
 
@@ -281,7 +281,7 @@ export default function LoginPage() {
 
               <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">
+                  <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">
                     6-Digit OTP
                   </label>
                   <input
@@ -291,7 +291,7 @@ export default function LoginPage() {
                     placeholder="• • • • • •"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-2xl tracking-[0.5em] text-center font-bold"
+                    className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] bg-white text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-2xl tracking-[0.5em] text-center font-bold"
                   />
                 </div>
 

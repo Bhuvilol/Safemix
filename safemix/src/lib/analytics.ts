@@ -43,4 +43,9 @@ export const AnalyticsEvents = {
   ADVERSE_EVENT_REPORTED: "adverse_event_reported",
   SIGN_UP: "sign_up",
   LOGIN: "login",
+  ASSISTANT_INVOKED: "assistant_invoked",
+  ASSISTANT_VOICE: "assistant_voice",
+  DATA_EXPORTED: "data_exported",
+  ACCOUNT_DELETED: "account_deleted",
+  REVIEWER_DECISION: "reviewer_decision",
 } as const;

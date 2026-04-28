@@ -139,11 +139,11 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F8F8F4] dark:bg-[#0f1410]">
+    <div className="min-h-screen flex bg-[#F8F8F4]">
       <div id="recaptcha-signup" />
 
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[42%] relative overflow-hidden p-12 bg-[#2d4035] dark:bg-[#1a2820]">
+      <div className="hidden lg:flex flex-col justify-between w-[42%] relative overflow-hidden p-12 bg-[#2d4035]">
         <Link href="/"><SafeMixLogo size={36} textSize="text-xl" /></Link>
         <div className="relative z-10">
           <h2 className="font-manrope font-bold text-4xl text-white mb-5 leading-tight">
@@ -183,8 +183,8 @@ export default function SignupPage() {
           {step === "profile" && (
             <>
               <div className="mb-7">
-                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Create your profile</h1>
-                <p className="text-[#52615a] dark:text-[#9ab0a0]">Help the AI understand your baseline for accurate safety verdicts.</p>
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] mb-2">Create your profile</h1>
+                <p className="text-[#52615a]">Help the AI understand your baseline for accurate safety verdicts.</p>
               </div>
 
               <form onSubmit={handleProfileNext} className="space-y-5">
@@ -192,11 +192,7 @@ export default function SignupPage() {
                 <div className="grid grid-cols-2 gap-3">
                   {roles.map((r) => (
                     <button key={r.id} type="button" onClick={() => setRole(r.id)}
-                      className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
-                        role === r.id
-                          ? "border-[#5E7464] bg-[#f0f8f2] dark:bg-[#1e2820] text-[#42594A] dark:text-[#b5ccba]"
-                          : "border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#52615a] dark:text-[#9ab0a0]"
-                      }`}>
+                      className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${ role === r.id ? "border-[#5E7464] bg-[#f0f8f2] text-[#42594A] " : "border-[#e0e8e2] bg-white text-[#52615a] " }`}>
                       <span className="material-symbols-outlined mb-1">{r.icon}</span>
                       <span className="text-xs font-bold">{r.label}</span>
                       <span className="text-[10px] text-center opacity-70 mt-0.5">{r.desc}</span>
@@ -206,23 +202,23 @@ export default function SignupPage() {
 
                 {/* Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-1.5">Full Name</label>
+                  <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-1.5">Full Name</label>
                   <input required type="text" placeholder="e.g. Ramesh Kumar" value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm" />
+                    className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] bg-white text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-1.5">Age</label>
+                    <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-1.5">Age</label>
                     <input required type="number" min="1" max="120" placeholder="e.g. 58" value={age}
                       onChange={(e) => setAge(e.target.value)}
-                      className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] transition-all text-sm" />
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] bg-white text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] transition-all text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-1.5">Sex</label>
+                    <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-1.5">Sex</label>
                     <select value={sex} onChange={(e) => setSex(e.target.value)}
-                      className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white focus:outline-none focus:border-[#5E7464] transition-all text-sm appearance-none">
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] bg-white text-[#1a2820] focus:outline-none focus:border-[#5E7464] transition-all text-sm appearance-none">
                       <option value="prefer_not_to_say">Select…</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
@@ -233,15 +229,11 @@ export default function SignupPage() {
 
                 {/* Conditions */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Known Conditions (optional)</label>
+                  <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Known Conditions (optional)</label>
                   <div className="flex flex-wrap gap-2">
                     {conditionsList.map((c) => (
                       <button key={c} type="button" onClick={() => toggleCondition(c)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                          conditions.includes(c)
-                            ? "bg-[#5E7464] text-white border-[#5E7464]"
-                            : "bg-white dark:bg-[#1e2820] text-[#52615a] dark:text-[#9ab0a0] border-[#e0e8e2] dark:border-white/15"
-                        }`}>
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${ conditions.includes(c) ? "bg-[#5E7464] text-white border-[#5E7464]" : "bg-white text-[#52615a] border-[#e0e8e2] " }`}>
                         {c}
                       </button>
                     ))}
@@ -249,30 +241,30 @@ export default function SignupPage() {
                 </div>
 
                 {/* Consent */}
-                <div className="p-4 rounded-xl bg-[#f0f8f2] dark:bg-[#1a2a1e] border border-[#b7eb8f]/30 flex gap-3 items-start">
+                <div className="p-4 rounded-xl bg-[#f0f8f2] border border-[#b7eb8f]/30 flex gap-3 items-start">
                   <ShieldCheck className="w-5 h-5 text-[#5E7464] flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs text-[#52615a] dark:text-[#9ab0a0] leading-relaxed mb-2">
-                      <strong className="text-[#1a2820] dark:text-white">DPDP Act 2023 Consent:</strong> We collect your age, sex, and health info strictly to calculate accurate medicine safety interactions. Your data is encrypted and never sold.
+                    <p className="text-xs text-[#52615a] leading-relaxed mb-2">
+                      <strong className="text-[#1a2820]">DPDP Act 2023 Consent:</strong> We collect your age, sex, and health info strictly to calculate accurate medicine safety interactions. Your data is encrypted and never sold.
                     </p>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={consentGiven} onChange={(e) => setConsentGiven(e.target.checked)}
                         className="w-4 h-4 rounded text-[#5E7464] focus:ring-[#5E7464]" />
-                      <span className="text-xs font-semibold text-[#1a2820] dark:text-white">I agree to the secure processing of my health data.</span>
+                      <span className="text-xs font-semibold text-[#1a2820]">I agree to the secure processing of my health data.</span>
                     </label>
                   </div>
                 </div>
 
                 {/* Sign up with Google (shortcut) */}
                 <button type="button" onClick={handleGoogle} disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white font-semibold text-sm hover:border-[#5E7464]/50 transition-all disabled:opacity-60">
+                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border-2 border-[#e0e8e2] bg-white text-[#1a2820] font-semibold text-sm hover:border-[#5E7464]/50 transition-all disabled:opacity-60">
                   {loading ? <div className="w-5 h-5 border-2 border-[#5E7464]/30 border-t-[#5E7464] rounded-full animate-spin" /> : <><GoogleIcon /> Sign up with Google</>}
                 </button>
 
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-[#e0e8e2] dark:bg-white/10" />
+                  <div className="flex-1 h-px bg-[#e0e8e2]" />
                   <span className="text-xs text-[#9ab0a0]">or use phone OTP</span>
-                  <div className="flex-1 h-px bg-[#e0e8e2] dark:bg-white/10" />
+                  <div className="flex-1 h-px bg-[#e0e8e2]" />
                 </div>
 
                 <button type="submit" disabled={loading}
@@ -282,7 +274,7 @@ export default function SignupPage() {
                 </button>
               </form>
 
-              <p className="text-center text-sm text-[#52615a] dark:text-[#9ab0a0] mt-6">
+              <p className="text-center text-sm text-[#52615a] mt-6">
                 Already have an account?{" "}
                 <Link href="/login" className="text-[#5E7464] font-semibold hover:underline">Sign in</Link>
               </p>
@@ -297,17 +289,17 @@ export default function SignupPage() {
                 <ChevronLeft className="w-4 h-4" /> Back
               </button>
               <div className="mb-8">
-                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Verify your number</h1>
-                <p className="text-[#52615a] dark:text-[#9ab0a0]">We&apos;ll send a 6-digit OTP to this number.</p>
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] mb-2">Verify your number</h1>
+                <p className="text-[#52615a]">We&apos;ll send a 6-digit OTP to this number.</p>
               </div>
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Mobile Number</label>
-                  <div className="flex rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 overflow-hidden focus-within:border-[#5E7464] focus-within:ring-2 focus-within:ring-[#5E7464]/20 transition-all">
-                    <span className="px-4 py-3.5 bg-[#f0f8f2] dark:bg-[#1a2a1e] text-[#5E7464] font-bold text-sm border-r border-[#e0e8e2] dark:border-white/15 flex-shrink-0">+91</span>
+                  <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Mobile Number</label>
+                  <div className="flex rounded-xl border-2 border-[#e0e8e2] overflow-hidden focus-within:border-[#5E7464] focus-within:ring-2 focus-within:ring-[#5E7464]/20 transition-all">
+                    <span className="px-4 py-3.5 bg-[#f0f8f2] text-[#5E7464] font-bold text-sm border-r border-[#e0e8e2] flex-shrink-0">+91</span>
                     <input type="tel" maxLength={10} placeholder="98765 43210" value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                      className="flex-1 px-4 py-3.5 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none text-sm" />
+                      className="flex-1 px-4 py-3.5 bg-white text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none text-sm" />
                   </div>
                 </div>
                 <button type="submit" disabled={loading || phone.length < 10}
@@ -327,15 +319,15 @@ export default function SignupPage() {
                 <ChevronLeft className="w-4 h-4" /> Change number
               </button>
               <div className="mb-8">
-                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Enter OTP</h1>
-                <p className="text-[#52615a] dark:text-[#9ab0a0]">
-                  Code sent to <span className="font-semibold text-[#1a2820] dark:text-white">+91 {phone}</span>
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] mb-2">Enter OTP</h1>
+                <p className="text-[#52615a]">
+                  Code sent to <span className="font-semibold text-[#1a2820]">+91 {phone}</span>
                 </p>
               </div>
               <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <input type="text" inputMode="numeric" maxLength={6} placeholder="• • • • • •" value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-2xl tracking-[0.5em] text-center font-bold" />
+                  className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] bg-white text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-2xl tracking-[0.5em] text-center font-bold" />
                 <button type="submit" disabled={loading || otp.length < 6}
                   className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold py-3.5 rounded-xl disabled:opacity-60"
                   style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>

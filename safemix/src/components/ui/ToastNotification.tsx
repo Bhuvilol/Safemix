@@ -38,13 +38,13 @@ export function ToastContainer() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto bg-white dark:bg-[#1e2820] border border-[#e0e8e2] dark:border-white/10 rounded-2xl shadow-2xl p-4 flex items-start gap-3 animate-slide-up"
+          className="pointer-events-auto bg-white border border-[#e0e8e2] rounded-2xl shadow-2xl p-4 flex items-start gap-3 animate-slide-up"
         >
           <div className="w-9 h-9 rounded-xl bg-[#5E7464]/10 flex items-center justify-center flex-shrink-0">
             <Bell className="w-4 h-4 text-[#5E7464]" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm text-[#1a2820] dark:text-white leading-tight">{toast.title}</p>
+            <p className="font-bold text-sm text-[#1a2820] leading-tight">{toast.title}</p>
             <p className="text-xs text-[#7a9080] mt-0.5 leading-relaxed">{toast.body}</p>
             {toast.href && (
               <Link href={toast.href} className="text-xs font-semibold text-[#5E7464] mt-1 inline-block hover:underline">

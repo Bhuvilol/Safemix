@@ -48,46 +48,38 @@ export default function FAQPage() {
       <main className="pt-[68px]">
 
         {/* Hero */}
-        <section className="py-24 bg-[#F8F8F4] dark:bg-[#0f1410] text-center">
+        <section className="py-24 bg-[#F8F8F4] text-center">
           <div className="max-w-2xl mx-auto px-6">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-[#5E7464]/10 text-[#42594A] dark:text-[#9ab0a0] text-xs font-bold tracking-widest uppercase mb-6">FAQ</span>
-            <h1 className="font-manrope font-bold text-5xl lg:text-6xl text-[#1a2820] dark:text-white mb-5">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-[#5E7464]/10 text-[#42594A] text-xs font-bold tracking-widest uppercase mb-6">FAQ</span>
+            <h1 className="font-manrope font-bold text-5xl lg:text-6xl text-[#1a2820] mb-5">
               Frequently Asked <span className="text-[#5E7464]">Questions</span>
             </h1>
-            <p className="text-xl text-[#52615a] dark:text-[#9ab0a0]">
+            <p className="text-xl text-[#52615a]">
               Everything you need to know about SafeMix.
             </p>
           </div>
         </section>
 
         {/* Accordion */}
-        <section className="py-16 bg-white dark:bg-[#141a15]">
+        <section className="py-16 bg-white">
           <div className="max-w-3xl mx-auto px-6">
             <div className="space-y-3">
               {faqs.map((faq, i) => (
                 <div key={i}
-                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-                    open === i
-                      ? "border-[#5E7464]/30 dark:border-[#5E7464]/30 bg-[#f4f8f5] dark:bg-[#1e2820]"
-                      : "border-[#e0e8e2] dark:border-white/10 bg-white dark:bg-[#1a2218] hover:border-[#5E7464]/20"
-                  }`}
+                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${ open === i ? "border-[#5E7464]/30 bg-[#f4f8f5] " : "border-[#e0e8e2] bg-white hover:border-[#5E7464]/20" }`}
                 >
                   <button
                     onClick={() => setOpen(open === i ? null : i)}
                     className="w-full flex items-center justify-between px-6 py-5 text-left group"
                   >
-                    <span className={`font-manrope font-semibold text-[0.95rem] leading-snug transition-colors ${
-                      open === i ? "text-[#42594A] dark:text-[#b5ccba]" : "text-[#1a2820] dark:text-white group-hover:text-[#42594A] dark:group-hover:text-[#b5ccba]"
-                    }`}>
+                    <span className={`font-manrope font-semibold text-[0.95rem] leading-snug transition-colors ${ open === i ? "text-[#42594A] " : "text-[#1a2820] group-hover:text-[#42594A] " }`}>
                       {faq.q}
                     </span>
-                    <ChevronDown className={`w-5 h-5 flex-shrink-0 ml-4 transition-all duration-300 ${
-                      open === i ? "rotate-180 text-[#5E7464]" : "text-[#9ab0a0]"
-                    }`} />
+                    <ChevronDown className={`w-5 h-5 flex-shrink-0 ml-4 transition-all duration-300 ${ open === i ? "rotate-180 text-[#5E7464]" : "text-[#9ab0a0]" }`} />
                   </button>
                   <div className={`transition-all duration-300 ${open === i ? "max-h-64 opacity-100" : "max-h-0 opacity-0"} overflow-hidden`}>
                     <div className="px-6 pb-6">
-                      <p className="text-sm text-[#52615a] dark:text-[#9ab0a0] leading-relaxed">{faq.a}</p>
+                      <p className="text-sm text-[#52615a] leading-relaxed">{faq.a}</p>
                     </div>
                   </div>
                 </div>
@@ -95,9 +87,9 @@ export default function FAQPage() {
             </div>
 
             {/* Still have questions */}
-            <div className="mt-16 text-center p-10 rounded-2xl bg-[#F8F8F4] dark:bg-[#1e2820] border border-[#e0e8e2] dark:border-white/10">
-              <h3 className="font-manrope font-bold text-2xl text-[#1a2820] dark:text-white mb-3">Still have questions?</h3>
-              <p className="text-[#52615a] dark:text-[#9ab0a0] mb-6">Our team responds within 24 hours.</p>
+            <div className="mt-16 text-center p-10 rounded-2xl bg-[#F8F8F4] border border-[#e0e8e2]">
+              <h3 className="font-manrope font-bold text-2xl text-[#1a2820] mb-3">Still have questions?</h3>
+              <p className="text-[#52615a] mb-6">Our team responds within 24 hours.</p>
               <a href="/contact" className="inline-flex items-center gap-2 text-white text-sm font-semibold px-8 py-3.5 rounded-full" style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
                 Contact Us
               </a>

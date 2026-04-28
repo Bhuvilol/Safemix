@@ -36,13 +36,13 @@ export default function AdrReviewPage() {
   useEffect(() => { loadReports(); }, []);
 
   return (
-    <div className="min-h-screen bg-[#F4F7F5] dark:bg-[#0f1410] p-6">
+    <div className="min-h-screen bg-[#F4F7F5] p-6">
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-manrope font-bold text-2xl text-[#1a2820] dark:text-white">
+            <h1 className="font-manrope font-bold text-2xl text-[#1a2820]">
               ADR Report Review
             </h1>
             <p className="text-sm text-[#7a9080] mt-0.5">
@@ -52,7 +52,7 @@ export default function AdrReviewPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={loadReports}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#e0e8e2] dark:border-white/10 text-sm font-medium text-[#52615a] hover:bg-white dark:hover:bg-[#1e2820] transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#e0e8e2] text-sm font-medium text-[#52615a] hover:bg-white transition-all"
             >
               <RefreshCw className="w-4 h-4" />
               Refresh
@@ -70,7 +70,7 @@ export default function AdrReviewPage() {
             { label: "Pending Review", value: reports.filter(r => r.status === "pending_review").length, color: "#F59E0B" },
             { label: "Severe Events", value: reports.filter(r => r.severity === "severe").length, color: "#C41C00" },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white dark:bg-[#1e2820] rounded-2xl border border-[#e0e8e2] dark:border-white/10 p-4 text-center">
+            <div key={stat.label} className="bg-white rounded-2xl border border-[#e0e8e2] p-4 text-center">
               <p className="text-2xl font-bold" style={{ color: stat.color }}>{stat.value}</p>
               <p className="text-xs text-[#7a9080] mt-1">{stat.label}</p>
             </div>
@@ -98,13 +98,13 @@ export default function AdrReviewPage() {
               const statusLabel = statusConfig[report.status]?.label || report.status;
 
               return (
-                <div key={report.docId} className="bg-white dark:bg-[#1e2820] rounded-2xl border border-[#e0e8e2] dark:border-white/10 p-5 space-y-4">
+                <div key={report.docId} className="bg-white rounded-2xl border border-[#e0e8e2] p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] font-black px-2 py-1 rounded-full" style={{ background: sev.bg, color: sev.color }}>
                         {sev.label.toUpperCase()}
                       </span>
-                      <h3 className="font-bold text-[#1a2820] dark:text-white">{report.medicine}</h3>
+                      <h3 className="font-bold text-[#1a2820]">{report.medicine}</h3>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: statusColor }}>
                       <StatusIcon className="w-3.5 h-3.5" />
@@ -132,12 +132,12 @@ export default function AdrReviewPage() {
                   </div>
 
                   {report.notes && (
-                    <p className="text-sm text-[#52615a] dark:text-[#9ab0a0] bg-[#F8F8F4] dark:bg-[#141a15] rounded-xl p-3">
+                    <p className="text-sm text-[#52615a] bg-[#F8F8F4] rounded-xl p-3">
                       {report.notes}
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between pt-2 border-t border-[#f0f4f1] dark:border-white/5">
+                  <div className="flex items-center justify-between pt-2 border-t border-[#f0f4f1]">
                     <span className="text-[10px] font-mono text-[#9ab0a0]">ID: {report.docId}</span>
                     <span className="text-[10px] text-[#9ab0a0]">UID: {report.uid?.slice(0, 8)}…</span>
                   </div>

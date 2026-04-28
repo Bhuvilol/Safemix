@@ -39,40 +39,40 @@ export default function FeaturesPage() {
       <Navbar />
       <main className="pt-[68px]">
         {/* Hero */}
-        <section className="py-24 bg-[#F8F8F4] dark:bg-[#0f1410] overflow-hidden relative">
+        <section className="py-24 bg-[#F8F8F4] overflow-hidden relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none opacity-40">
              <div className="absolute top-[-10%] left-[10%] w-[400px] h-[400px] bg-[#5E7464] rounded-full blur-[120px]" />
              <div className="absolute bottom-[10%] right-[10%] w-[300px] h-[300px] bg-blue-400 rounded-full blur-[120px]" />
           </div>
 
           <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 border border-[#e0e8e2] dark:border-white/10 text-[#42594A] dark:text-[#9ab0a0] text-xs font-bold tracking-widest uppercase mb-8 shadow-sm">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 border border-[#e0e8e2] text-[#42594A] text-xs font-bold tracking-widest uppercase mb-8 shadow-sm">
               <Sparkles className="w-3.5 h-3.5" />
               Comprehensive Platform
             </span>
-            <h1 className="font-manrope font-bold text-5xl lg:text-7xl text-[#1a2820] dark:text-white mb-8 tracking-tight">
+            <h1 className="font-manrope font-bold text-5xl lg:text-7xl text-[#1a2820] mb-8 tracking-tight">
               Why SafeMix <span className="text-[#5E7464]">Works</span>
             </h1>
-            <p className="text-xl text-[#52615a] dark:text-[#9ab0a0] leading-relaxed max-w-2xl mx-auto">
+            <p className="text-xl text-[#52615a] leading-relaxed max-w-2xl mx-auto">
               India&apos;s unique healthcare landscape requires more than just a list of drugs. SafeMix provides the clinical intelligence needed for a safer India.
             </p>
           </div>
         </section>
 
         {/* Feature Grid */}
-        <section className="py-24 bg-white dark:bg-[#141a15]">
+        <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
               {featureList.map((f, i) => (
                 <div key={f.title} className="group cursor-default">
-                  <div className="w-14 h-14 rounded-2xl bg-[#F8F8F4] dark:bg-[#1e2820] border border-[#e0e8e2] dark:border-white/10 flex items-center justify-center mb-6 group-hover:bg-[#5E7464] group-hover:border-[#5E7464] transition-all duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-[#F8F8F4] border border-[#e0e8e2] flex items-center justify-center mb-6 group-hover:bg-[#5E7464] group-hover:border-[#5E7464] transition-all duration-300">
                     <f.icon className="w-6 h-6 text-[#5E7464] group-hover:text-white transition-colors" />
                   </div>
-                  <h3 className="font-manrope font-bold text-xl text-[#1a2820] dark:text-white mb-4 flex items-center gap-2">
+                  <h3 className="font-manrope font-bold text-xl text-[#1a2820] mb-4 flex items-center gap-2">
                     {f.title}
                     <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-[#5E7464]" />
                   </h3>
-                  <p className="text-[#52615a] dark:text-[#9ab0a0] leading-relaxed text-[0.95rem]">
+                  <p className="text-[#52615a] leading-relaxed text-[0.95rem]">
                     {f.desc}
                   </p>
                 </div>
@@ -82,21 +82,21 @@ export default function FeaturesPage() {
         </section>
 
         {/* Comparison Quote */}
-        <section className="py-20 bg-[#F8F8F4] dark:bg-[#0f1410] border-y border-[#e0e8e2] dark:border-white/10 text-center">
+        <section className="py-20 bg-[#F8F8F4] border-y border-[#e0e8e2] text-center">
           <div className="max-w-3xl mx-auto px-6">
-            <blockquote className="font-manrope italic text-2xl text-[#1a2820] dark:text-white leading-relaxed">
+            <blockquote className="font-manrope italic text-2xl text-[#1a2820] leading-relaxed">
               &quot;SafeMix bridges the critical gap between traditional remedies and modern medicine, making it an essential tool for every Indian household.&quot;
             </blockquote>
             <div className="mt-8 flex flex-col items-center">
               <div className="w-12 h-12 rounded-full bg-[#5E7464]/20 flex items-center justify-center mb-4 font-bold text-[#5E7464]">DS</div>
-              <cite className="not-italic font-bold text-[#1a2820] dark:text-white">Dr. Satya Vardhan</cite>
+              <cite className="not-italic font-bold text-[#1a2820]">Dr. Satya Vardhan</cite>
               <span className="text-xs text-[#9ab0a0] uppercase tracking-widest mt-1">Chief Clinical Officer</span>
             </div>
           </div>
         </section>
 
         {/* Final CTA */}
-        <section className="py-24 bg-white dark:bg-[#141a15]">
+        <section className="py-24 bg-white">
           <div className="max-w-4xl mx-auto px-6">
             <div className="bg-gradient-to-br from-[#42594A] to-[#1e2f25] rounded-[40px] p-8 md:p-16 text-center text-white relative overflow-hidden shadow-2xl">
                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />

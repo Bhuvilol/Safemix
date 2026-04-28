@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import SafeMixLogo from "@/components/ui/Logo";
 import { useAuth } from "@/components/providers/AuthProvider";
+import LanguagePicker from "@/components/ui/LanguagePicker";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -20,25 +21,9 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dark, setDark] = useState(false);
   const pathname = usePathname();
   const { user } = useAuth();
   const isLoggedIn = !!user;
-
-  useEffect(() => {
-    const stored = localStorage.getItem("safemix-dark");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = stored ? stored === "true" : prefersDark;
-    setDark(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-  }, []);
-
-  const toggleDark = () => {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("safemix-dark", String(next));
-  };
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 16);
@@ -51,11 +36,7 @@ export default function Navbar() {
   const isDash = pathname.startsWith("/dashboard") || pathname.startsWith("/admin") || pathname.startsWith("/doctor-portal");
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      scrolled
-        ? "bg-white/96 dark:bg-[#141a15]/96 backdrop-blur-xl shadow-[0_2px_20px_rgba(0,0,0,0.08)] border-b border-[#c3c8c1]/40 dark:border-white/10"
-        : "bg-white/80 dark:bg-[#141a15]/70 backdrop-blur-md"
-    }`}>
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${ scrolled ? "bg-white/96 backdrop-blur-xl shadow-[0_2px_20px_rgba(0,0,0,0.08)] border-b border-[#c3c8c1]/40 " : "bg-white/80 backdrop-blur-md" }`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex items-center justify-between h-[68px]">
 
@@ -70,11 +51,7 @@ export default function Navbar() {
               const active = pathname === l.href;
               return (
                 <Link key={l.href} href={l.href}
-                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 relative ${
-                    active
-                      ? "text-[#42594A] dark:text-[#b5ccba] bg-[#f0f5f1] dark:bg-[#2a3430]"
-                      : "text-[#52615a] dark:text-[#9ab0a0] hover:text-[#42594A] dark:hover:text-[#b5ccba] hover:bg-[#f4f7f5] dark:hover:bg-[#202820]"
-                  }`}
+                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 relative ${ active ? "text-[#42594A] bg-[#f0f5f1] " : "text-[#52615a] hover:text-[#42594A] hover:bg-[#f4f7f5] " }`}
                 >
                   {l.label}
                 </Link>
@@ -84,18 +61,12 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div className="hidden lg:flex items-center gap-2">
-            {/* Dark toggle */}
-            <button onClick={toggleDark}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-[#f0f5f1] dark:bg-[#202820] text-[#5E7464] dark:text-[#9ab0a0] hover:bg-[#dceae0] dark:hover:bg-[#2a3430] transition-colors"
-              aria-label="Toggle dark mode"
-            >
-              {dark ? <Sun className="w-[15px] h-[15px]" /> : <Moon className="w-[15px] h-[15px]" />}
-            </button>
+            <LanguagePicker />
 
             {(!isDash && !isLoggedIn) && (
               <>
                 <Link href="/login"
-                  className="px-4 py-2 text-sm font-semibold text-[#42594A] dark:text-[#9ab0a0] hover:bg-[#f0f5f1] dark:hover:bg-[#202820] rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-semibold text-[#42594A] hover:bg-[#f0f5f1] rounded-lg transition-colors"
                 >
                   Login
                 </Link>
@@ -127,13 +98,9 @@ export default function Navbar() {
 
           {/* Mobile */}
           <div className="lg:hidden flex items-center gap-2">
-            <button onClick={toggleDark}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-[#f0f5f1] dark:bg-[#202820] text-[#5E7464] dark:text-[#9ab0a0]"
-            >
-              {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
+            <LanguagePicker />
             <button onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 rounded-lg text-[#42594A] dark:text-[#9ab0a0] hover:bg-[#f0f5f1] dark:hover:bg-[#202820] transition-colors"
+              className="p-2 rounded-lg text-[#42594A] hover:bg-[#f0f5f1] transition-colors"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -143,20 +110,16 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       <div className={`lg:hidden overflow-hidden transition-all duration-300 ${mobileOpen ? "max-h-[600px]" : "max-h-0"}`}>
-        <div className="bg-white dark:bg-[#141a15] border-t border-[#c3c8c1]/30 dark:border-white/10 px-6 py-4 space-y-1">
+        <div className="bg-white border-t border-[#c3c8c1]/30 px-6 py-4 space-y-1">
           {navLinks.map((l) => (
             <Link key={l.href} href={l.href}
-              className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                pathname === l.href
-                  ? "bg-[#dceae0] dark:bg-[#2a3430] text-[#42594A] dark:text-[#b5ccba]"
-                  : "text-[#52615a] dark:text-[#9ab0a0] hover:bg-[#f0f5f1] dark:hover:bg-[#202820]"
-              }`}
+              className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${ pathname === l.href ? "bg-[#dceae0] text-[#42594A] " : "text-[#52615a] hover:bg-[#f0f5f1] " }`}
             >
               {l.label}
             </Link>
           ))}
-          <div className="pt-3 flex flex-col gap-2 border-t border-[#c3c8c1]/30 dark:border-white/10 mt-2">
-            <Link href="/login" className="text-center py-3 text-sm font-semibold text-[#42594A] dark:text-[#9ab0a0] border border-[#c3c8c1] dark:border-white/20 rounded-xl hover:bg-[#f0f5f1] dark:hover:bg-[#202820] transition-colors">
+          <div className="pt-3 flex flex-col gap-2 border-t border-[#c3c8c1]/30 mt-2">
+            <Link href="/login" className="text-center py-3 text-sm font-semibold text-[#42594A] border border-[#c3c8c1] rounded-xl hover:bg-[#f0f5f1] transition-colors">
               Login
             </Link>
             <Link href="/signup" className="text-center py-3 text-sm font-semibold text-white rounded-xl" style={{ background: "linear-gradient(135deg, #5E7464 0%, #42594A 100%)" }}>

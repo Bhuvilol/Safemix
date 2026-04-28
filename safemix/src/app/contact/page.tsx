@@ -21,49 +21,49 @@ export default function ContactPage() {
       <main className="pt-[68px]">
 
         {/* Hero */}
-        <section className="py-20 bg-[#F8F8F4] dark:bg-[#0f1410]">
+        <section className="py-20 bg-[#F8F8F4]">
           <div className="max-w-3xl mx-auto px-6 text-center">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-[#5E7464]/10 text-[#42594A] dark:text-[#9ab0a0] text-xs font-bold tracking-widest uppercase mb-6">Get In Touch</span>
-            <h1 className="font-manrope font-bold text-5xl lg:text-6xl text-[#1a2820] dark:text-white mb-5">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-[#5E7464]/10 text-[#42594A] text-xs font-bold tracking-widest uppercase mb-6">Get In Touch</span>
+            <h1 className="font-manrope font-bold text-5xl lg:text-6xl text-[#1a2820] mb-5">
               Let&apos;s <span className="text-[#5E7464]">Connect</span>
             </h1>
-            <p className="text-xl text-[#52615a] dark:text-[#9ab0a0]">
+            <p className="text-xl text-[#52615a]">
               Whether you&apos;re a hospital, insurer, researcher, or patient — we&apos;d love to hear from you.
             </p>
           </div>
         </section>
 
         {/* Main */}
-        <section className="py-16 bg-white dark:bg-[#141a15]">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
             <div className="grid lg:grid-cols-3 gap-12">
 
               {/* Left info */}
               <div className="space-y-8">
                 <div>
-                  <h2 className="font-manrope font-bold text-2xl text-[#1a2820] dark:text-white mb-6">Contact Info</h2>
+                  <h2 className="font-manrope font-bold text-2xl text-[#1a2820] mb-6">Contact Info</h2>
                   {[
                     { icon: Mail, label: "Email", val: "hello@safemix.in" },
                     { icon: Phone, label: "Phone", val: "+91 98765 43210" },
                     { icon: MapPin, label: "Location", val: "Bengaluru, India" },
                   ].map((c) => (
                     <div key={c.label} className="flex items-start gap-4 mb-5">
-                      <div className="w-10 h-10 rounded-xl bg-[#f0f5f1] dark:bg-[#1e2820] flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#f0f5f1] flex items-center justify-center flex-shrink-0">
                         <c.icon className="w-5 h-5 text-[#5E7464]" />
                       </div>
                       <div>
                         <p className="text-xs font-semibold text-[#9ab0a0] uppercase tracking-widest mb-0.5">{c.label}</p>
-                        <p className="text-sm font-medium text-[#1a2820] dark:text-white">{c.val}</p>
+                        <p className="text-sm font-medium text-[#1a2820]">{c.val}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-6 rounded-2xl bg-[#F8F8F4] dark:bg-[#1e2820] border border-[#e0e8e2] dark:border-white/10">
-                  <h3 className="font-manrope font-semibold text-lg text-[#1a2820] dark:text-white mb-3">Common Inquiries</h3>
+                <div className="p-6 rounded-2xl bg-[#F8F8F4] border border-[#e0e8e2]">
+                  <h3 className="font-manrope font-semibold text-lg text-[#1a2820] mb-3">Common Inquiries</h3>
                   <ul className="space-y-2">
                     {["Hospital onboarding & licensing", "Insurance data integrations", "Research partnerships", "Media & press kit", "Investor relations"].map((item) => (
-                      <li key={item} className="flex items-center gap-2 text-sm text-[#52615a] dark:text-[#9ab0a0]">
+                      <li key={item} className="flex items-center gap-2 text-sm text-[#52615a]">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#5E7464]" />
                         {item}
                       </li>
@@ -77,8 +77,8 @@ export default function ContactPage() {
                 {sent ? (
                   <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center">
                     <CheckCircle className="w-16 h-16 text-[#5E7464] mb-5" />
-                    <h3 className="font-manrope font-bold text-2xl text-[#1a2820] dark:text-white mb-3">Message Sent!</h3>
-                    <p className="text-[#52615a] dark:text-[#9ab0a0] mb-6">We&apos;ll get back to you within 24 hours.</p>
+                    <h3 className="font-manrope font-bold text-2xl text-[#1a2820] mb-3">Message Sent!</h3>
+                    <p className="text-[#52615a] mb-6">We&apos;ll get back to you within 24 hours.</p>
                     <button onClick={() => setSent(false)} className="text-sm font-semibold text-[#5E7464] hover:underline">
                       Send another message
                     </button>
@@ -93,24 +93,24 @@ export default function ContactPage() {
                         { id: "org", label: "Organization (optional)", placeholder: "Hospital / Clinic / Insurance", type: "text" },
                       ].map((f) => (
                         <div key={f.id}>
-                          <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">{f.label}</label>
+                          <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">{f.label}</label>
                           <input
                             type={f.type}
                             placeholder={f.placeholder}
                             value={form[f.id as keyof typeof form]}
                             onChange={(e) => setForm({ ...form, [f.id]: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-[#F8F8F4] dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] dark:focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
+                            className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] bg-[#F8F8F4] text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
                           />
                         </div>
                       ))}
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Topic</label>
+                      <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Topic</label>
                       <select
                         value={form.topic}
                         onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-[#F8F8F4] dark:bg-[#1e2820] text-[#1a2820] dark:text-white focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
+                        className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] bg-[#F8F8F4] text-[#1a2820] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
                       >
                         <option value="">Select a topic...</option>
                         {topics.map((t) => <option key={t}>{t}</option>)}
@@ -118,13 +118,13 @@ export default function ContactPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Message</label>
+                      <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Message</label>
                       <textarea
                         rows={5}
                         placeholder="Tell us how we can help..."
                         value={form.message}
                         onChange={(e) => setForm({ ...form, message: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-[#F8F8F4] dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm resize-none"
+                        className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] bg-[#F8F8F4] text-[#1a2820] placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm resize-none"
                       />
                     </div>
 

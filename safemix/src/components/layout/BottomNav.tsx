@@ -15,7 +15,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-[#1A1F1B] border-t border-[#E3E2E0] dark:border-[#434843] flex items-center justify-around px-2 z-50 pb-safe shadow-[0_-4px_24px_rgba(70,91,76,0.06)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#E3E2E0] flex items-center justify-around px-2 z-50 pb-safe shadow-[0_-4px_24px_rgba(70,91,76,0.06)]">
       {navItems.map((item) => {
         // Mark active for the item and any sub-routes (e.g. /dashboard/add-medicine/xxx)
         const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -27,20 +27,12 @@ export default function BottomNav() {
             className="flex flex-col items-center justify-center w-full h-full gap-1"
           >
             <div
-              className={`relative flex items-center justify-center w-10 h-8 rounded-full transition-colors duration-200 ${
-                isActive
-                  ? "bg-[#D0E9D5] dark:bg-[#465b4c]/40 text-[#0B1F14] dark:text-[#E1F9E5]"
-                  : "text-[#737873] dark:text-[#C3C8C1]"
-              }`}
+              className={`relative flex items-center justify-center w-10 h-8 rounded-full transition-colors duration-200 ${ isActive ? "bg-[#D0E9D5] text-[#0B1F14] " : "text-[#737873] " }`}
             >
               <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5px]" : "stroke-2"}`} />
             </div>
             <span
-              className={`text-[10px] font-semibold transition-colors duration-200 ${
-                isActive
-                  ? "text-[#0B1F14] dark:text-[#E3E2E0]"
-                  : "text-[#737873] dark:text-[#C3C8C1]"
-              }`}
+              className={`text-[10px] font-semibold transition-colors duration-200 ${ isActive ? "text-[#0B1F14] " : "text-[#737873] " }`}
             >
               {item.name}
             </span>

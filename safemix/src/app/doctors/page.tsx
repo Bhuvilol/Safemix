@@ -20,20 +20,20 @@ export default function DoctorsPage() {
       <Navbar />
       <main className="pt-[68px]">
         {/* Hero */}
-        <section className="py-20 bg-[#F8F8F4] dark:bg-[#0f1410]">
+        <section className="py-20 bg-[#F8F8F4]">
           <div className="max-w-4xl mx-auto px-6 text-center">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-[#5E7464]/10 text-[#42594A] dark:text-[#9ab0a0] text-xs font-bold tracking-widest uppercase mb-6">For Medical Professionals</span>
-            <h1 className="font-manrope font-bold text-5xl lg:text-6xl text-[#1a2820] dark:text-white mb-6">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-[#5E7464]/10 text-[#42594A] text-xs font-bold tracking-widest uppercase mb-6">For Medical Professionals</span>
+            <h1 className="font-manrope font-bold text-5xl lg:text-6xl text-[#1a2820] mb-6">
               Review Patient Medicines <span className="text-[#5E7464]">in 60 Seconds</span>
             </h1>
-            <p className="text-xl text-[#52615a] dark:text-[#9ab0a0] max-w-2xl mx-auto">
+            <p className="text-xl text-[#52615a] max-w-2xl mx-auto">
               SafeMix helps doctors identify dangerous drug-herb and drug-drug interactions that are often missed in standard EHRs.
             </p>
             <div className="mt-10 flex flex-wrap justify-center gap-4">
               <Link href="/contact" className="px-8 py-4 bg-[#42594A] text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all">
                 Request Hospital Demo
               </Link>
-              <Link href="/login" className="px-8 py-4 bg-white dark:bg-[#1e2820] text-[#42594A] dark:text-white border border-[#e0e8e2] dark:border-white/10 rounded-full font-semibold hover:bg-[#f0f5f1] transition-all">
+              <Link href="/login" className="px-8 py-4 bg-white text-[#42594A] border border-[#e0e8e2] rounded-full font-semibold hover:bg-[#f0f5f1] transition-all">
                 Doctor Login
               </Link>
             </div>
@@ -41,16 +41,16 @@ export default function DoctorsPage() {
         </section>
 
         {/* Modules */}
-        <section className="py-20 bg-white dark:bg-[#141a15]">
+        <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {modules.map((m) => (
-                <div key={m.title} className="p-8 rounded-2xl border border-[#e0e8e2] dark:border-white/10 bg-[#F8F8F4] dark:bg-[#1e2820] hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all">
+                <div key={m.title} className="p-8 rounded-2xl border border-[#e0e8e2] bg-[#F8F8F4] hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all">
                   <div className="w-12 h-12 rounded-xl bg-[#5E7464]/10 flex items-center justify-center mb-6">
                     <m.icon className="w-6 h-6 text-[#5E7464]" />
                   </div>
-                  <h3 className="font-manrope font-bold text-xl text-[#1a2820] dark:text-white mb-3">{m.title}</h3>
-                  <p className="text-[#52615a] dark:text-[#9ab0a0] leading-relaxed">{m.desc}</p>
+                  <h3 className="font-manrope font-bold text-xl text-[#1a2820] mb-3">{m.title}</h3>
+                  <p className="text-[#52615a] leading-relaxed">{m.desc}</p>
                 </div>
               ))}
             </div>
@@ -58,10 +58,10 @@ export default function DoctorsPage() {
         </section>
 
         {/* CTA */}
-        <section className="py-20 bg-[#F8F8F4] dark:bg-[#0f1410] border-t border-[#e0e8e2] dark:border-white/10">
+        <section className="py-20 bg-[#F8F8F4] border-t border-[#e0e8e2]">
           <div className="max-w-3xl mx-auto px-6 text-center">
-            <h2 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-6">Empower Your Practice with AI Safety</h2>
-            <p className="text-[#52615a] dark:text-[#9ab0a0] mb-10">
+            <h2 className="font-manrope font-bold text-3xl text-[#1a2820] mb-6">Empower Your Practice with AI Safety</h2>
+            <p className="text-[#52615a] mb-10">
               Join the network of clinical professionals using SafeMix to ensure medication safety for their patients.
             </p>
             <Link href="/contact" className="inline-flex items-center gap-2 text-white text-sm font-semibold px-8 py-4 rounded-full" style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>

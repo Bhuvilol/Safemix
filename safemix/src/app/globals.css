@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* ── Dark mode via class ── */
-@custom-variant dark (&:where(.dark, .dark *));
-
 /* ── SafeMix Design System ── */
 @theme {
   /* Fonts */
@@ -100,12 +97,6 @@
     color: var(--color-on-surface);
   }
 
-  /* Dark mode body */
-  html.dark body {
-    background-color: #1a1f1b;
-    color: #e3e2e0;
-  }
-
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-manrope), sans-serif;
   }
@@ -156,31 +147,6 @@
   .animate-float-delay-3 {
     animation: var(--animate-float-delay-3);
   }
-
-  /* Dark mode overrides for surfaces */
-  html.dark .bg-surface-container-low {
-    background-color: #222823 !important;
-  }
-
-  html.dark .bg-white {
-    background-color: #2a312b !important;
-  }
-
-  html.dark .bg-surface {
-    background-color: #1a1f1b !important;
-  }
-
-  html.dark .text-on-surface {
-    color: #e3e2e0 !important;
-  }
-
-  html.dark .text-on-surface-variant {
-    color: #c3c8c1 !important;
-  }
-
-  html.dark .border-outline-variant\/30 {
-    border-color: rgba(115, 120, 115, 0.3) !important;
-  }
 }
 
 /* ── Print styles (Doctor Portal PDF) ──────────────────────────────────── */
@@ -190,7 +156,6 @@
     margin: 15mm 20mm;
   }
 
-  /* Force light mode on print */
   html, body {
     background: #fff !important;
     color: #000 !important;
@@ -221,8 +186,7 @@
     text-shadow: none !important;
   }
 
-  /* Ensure backgrounds print */
-  .bg-white, [class*="dark:bg-"] {
+  .bg-white {
     background: #fff !important;
   }
 
