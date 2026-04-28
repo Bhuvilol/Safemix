@@ -33,7 +33,48 @@ function inferUseTarget(medicineName: string): string | null {
   return byToken?.commonUse ?? null;
 }
 
+const THERAPEUTIC_ALTERNATIVES: Array<{ match: RegExp; options: Array<{ name: string; system: string; rationale: string }> }> = [
+  {
+    match: /paracetamol|acetaminophen/i,
+    options: [
+      { name: "Ibuprofen 400mg", system: "Allopathic", rationale: "Alternative analgesic/anti-inflammatory when clinically suitable." },
+      { name: "Haldi Doodh (Turmeric Milk)", system: "Home Remedy", rationale: "Mild symptom relief option for non-severe pain/cold contexts." },
+    ],
+  },
+  {
+    match: /metformin/i,
+    options: [
+      { name: "Sitagliptin 100mg", system: "Allopathic", rationale: "Common oral anti-diabetic alternative class." },
+      { name: "Insulin Glargine", system: "Allopathic", rationale: "Escalation option for physician-supervised glycemic control." },
+    ],
+  },
+  {
+    match: /lisinopril|enalapril|losartan|telmisartan|amlodipine/i,
+    options: [
+      { name: "Amlodipine 5mg", system: "Allopathic", rationale: "Alternative antihypertensive class selection may reduce interaction risk." },
+      { name: "Losartan 50mg", system: "Allopathic", rationale: "Alternative ARB option, physician to individualize therapy." },
+    ],
+  },
+  {
+    match: /levothyroxine/i,
+    options: [
+      { name: "Levothyroxine 50mcg", system: "Allopathic", rationale: "Dose titration under TSH monitoring can mitigate side effects." },
+      { name: "Levothyroxine 100mcg", system: "Allopathic", rationale: "Alternative dose strength for supervised regimen optimization." },
+    ],
+  },
+];
+
 function deterministicAlternatives(medicineName: string, existingMedicines: string[]): AlternativeOption[] {
+  const therapyMapped = THERAPEUTIC_ALTERNATIVES.find((t) => t.match.test(medicineName));
+  if (therapyMapped) {
+    const safeMapped = therapyMapped.options
+      .filter((o) => !existingMedicines.some((e) => normalize(e) === normalize(o.name)))
+      .filter((o) => !existingMedicines.some((e) => !!lookupInteraction(o.name, [e])))
+      .slice(0, 4)
+      .map((o) => ({ ...o, confidence: "high" as const, source: "rules" as const }));
+    if (safeMapped.length > 0) return safeMapped;
+  }
+
   const targetUse = inferUseTarget(medicineName);
   if (!targetUse) return [];
 
@@ -136,4 +177,3 @@ Rules:
     warning: "Please consult your doctor/pharmacist before changing your medicine routine.",
   };
 }
-
