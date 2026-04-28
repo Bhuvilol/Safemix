@@ -11,8 +11,10 @@ import {
   GoogleAuthProvider,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  getIdToken,
   type ConfirmationResult,
 } from "firebase/auth";
+import { initializeSelfRole } from "@/app/actions/adminClaims";
 
 declare global {
   interface Window { recaptchaVerifierSignup?: RecaptchaVerifier; }
@@ -95,6 +97,8 @@ export default function SignupPage() {
     try {
       const provider = new GoogleAuthProvider();
       const cred = await signInWithPopup(auth, provider);
+      await initializeSelfRole(cred.user.uid, role);
+      await getIdToken(cred.user, true);
       saveProfile(cred.user.uid, cred.user.displayName || name);
       router.replace("/dashboard");
     } catch (e: any) {
@@ -130,6 +134,8 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const cred = await confirm.confirm(otp);
+      await initializeSelfRole(cred.user.uid, role);
+      await getIdToken(cred.user, true);
       saveProfile(cred.user.uid, name);
       router.replace("/dashboard");
     } catch {

@@ -226,6 +226,9 @@ function PrivacyPanel({ uid, onAccountDeleted }: { uid: string | null; onAccount
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [confirmText, setConfirmText] = useState("");
+  const [abdmLoading, setAbdmLoading] = useState(false);
+  const [abdmError, setAbdmError] = useState<string | null>(null);
+  const [abdmItems, setAbdmItems] = useState<Array<Record<string, any>>>([]);
 
   const handleExport = async () => {
     if (!uid) return;
@@ -272,6 +275,40 @@ function PrivacyPanel({ uid, onAccountDeleted }: { uid: string | null; onAccount
     }
   };
 
+  const refreshAbdm = async () => {
+    if (!uid) return;
+    setAbdmError(null);
+    const res = await fetch(`/api/abdm/consent/list?uid=${encodeURIComponent(uid)}`, { method: "GET" });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Failed to load ABDM consents");
+    setAbdmItems(json.items ?? []);
+  };
+
+  const handleAbdmConsentRequest = async () => {
+    if (!uid) return;
+    setAbdmLoading(true);
+    setAbdmError(null);
+    try {
+      const res = await fetch("/api/abdm/consent/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid,
+          purpose: "medication_safety",
+          hiTypes: ["Prescription", "DiagnosticReport"],
+          days: 180,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to request consent");
+      await refreshAbdm();
+    } catch (e) {
+      setAbdmError((e as Error).message);
+    } finally {
+      setAbdmLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
       <div>
@@ -279,6 +316,40 @@ function PrivacyPanel({ uid, onAccountDeleted }: { uid: string | null; onAccount
         <p className="text-sm text-[#7a9080] mt-1">
           Under the DPDP Act, you have the right to a copy of your data and the right to erasure. SafeMix fulfils both within 30 days of request.
         </p>
+      </div>
+
+      {/* Export */}
+      <div className="rounded-2xl border border-[#e0e8e2] bg-[#F8F8F4] p-5 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-[#1a2820]">ABDM Consent</h3>
+            <p className="text-xs text-[#7a9080] mt-0.5">
+              Request ABDM consent for medication safety import/export. Status updates appear below.
+            </p>
+          </div>
+          <button
+            onClick={handleAbdmConsentRequest}
+            disabled={!uid || abdmLoading}
+            className="px-4 py-2.5 rounded-xl bg-[#42594A] text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+          >
+            {abdmLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+            {abdmLoading ? "Requesting..." : "Request Consent"}
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={refreshAbdm} className="px-3 py-1.5 rounded-lg text-xs border border-[#d7e0d9] bg-white">Refresh status</button>
+        </div>
+        {abdmError && <p className="text-xs text-red-600">{abdmError}</p>}
+        {abdmItems.length > 0 && (
+          <div className="space-y-2">
+            {abdmItems.slice(0, 5).map((it) => (
+              <div key={String(it.id)} className="p-2 rounded-lg border border-[#e0e8e2] bg-white text-xs">
+                <p className="font-semibold text-[#1a2820]">{String(it.purpose ?? "consent")} · {String(it.status ?? "requested")}</p>
+                <p className="text-[#7a9080]">ID: {String(it.id)} {it.createdAt ? `· ${new Date(Number(it.createdAt)).toLocaleString()}` : ""}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Export */}

@@ -31,3 +31,30 @@ export async function setUserRole(uid: string, role: string) {
 
   return { uid, role };
 }
+
+/**
+ * Bootstrap custom role claim for the currently signed-in user after signup.
+ * Only allows patient/caregiver self-assignment; elevated roles remain admin-only.
+ */
+export async function initializeSelfRole(uid: string, role: string) {
+  if (!uid) throw new Error("uid required");
+  assertRole(role);
+  if (role !== "patient" && role !== "caregiver") {
+    throw new Error("Only patient/caregiver roles can be self-initialized");
+  }
+
+  const adminAuth = getAdminAuth();
+  const user = await adminAuth.getUser(uid);
+  const prevClaims = user.customClaims ?? {};
+
+  if (prevClaims.role && prevClaims.role !== role) {
+    throw new Error("Role already assigned; contact support for role changes");
+  }
+
+  await adminAuth.setCustomUserClaims(uid, {
+    ...prevClaims,
+    role,
+  });
+
+  return { uid, role };
+}
