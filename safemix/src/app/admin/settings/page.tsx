@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { Settings, Save, Loader2 } from "lucide-react";
+import { auth } from "@/lib/firebase/config";
 
 interface Flags {
   voice_input_enabled: boolean;
@@ -46,6 +47,8 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [replaying, setReplaying] = useState(false);
+  const [replayResult, setReplayResult] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -65,6 +68,27 @@ export default function AdminSettingsPage() {
       setSavedAt(Date.now());
     } finally {
       setSaving(false);
+    }
+  };
+
+  const replayQueuedConsents = async () => {
+    setReplaying(true);
+    setReplayResult("");
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error("Login required");
+      const token = await user.getIdToken();
+      const res = await fetch("/api/abdm/consent/replay", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Replay failed");
+      setReplayResult(`Processed ${json.total} queued requests: ${json.success} sent, ${json.failed} failed.`);
+    } catch (e) {
+      setReplayResult((e as Error).message);
+    } finally {
+      setReplaying(false);
     }
   };
 
@@ -126,6 +150,20 @@ export default function AdminSettingsPage() {
         {saving ? "Saving…" : "Save flags"}
       </button>
       {savedAt && <p className="text-xs text-[#42594A]">Saved {new Date(savedAt).toLocaleTimeString("en-IN")}.</p>}
+
+      <div className="bg-white border border-[#e0e8e2] rounded-2xl p-5 space-y-3">
+        <h3 className="font-bold text-[#1a2820] text-sm">ABDM Offline Queue Replay</h3>
+        <p className="text-xs text-[#7a9080]">Resend queued consent requests (`local_requested`) after gateway credentials are configured.</p>
+        <button
+          onClick={replayQueuedConsents}
+          disabled={replaying}
+          className="px-4 py-2 rounded-xl bg-[#42594A] text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+        >
+          {replaying ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+          {replaying ? "Replaying..." : "Replay queued consents"}
+        </button>
+        {replayResult && <p className="text-xs text-[#42594A]">{replayResult}</p>}
+      </div>
     </div>
   );
 }
