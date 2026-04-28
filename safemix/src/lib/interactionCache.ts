@@ -18,6 +18,12 @@ export interface CachedVerdict {
   confidence?: "high" | "medium" | "low";
   source?: "rules" | "ai";  // Stage 1 (deterministic) or Stage 2 (Gemini)
   checkedAt: number;     // epoch ms
+  /** PMID / DOI / PvPI / AIIA references — PRD §9.4 trust layer */
+  citations?: string[];
+  /** Localised explanation in the user's chosen language */
+  plainExplanation?: string;
+  /** ID of the human-review record gating this output, when set */
+  reviewQueueId?: string | null;
 }
 
 const CACHE_KEY = "safemix_interaction_cache";

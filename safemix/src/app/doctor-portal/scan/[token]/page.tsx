@@ -7,11 +7,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { decodeDoctorShareToken } from "@/app/actions/doctorShare";
+import { mintRegimenVC } from "@/app/actions/mintVc";
 import {
-  readPatientSnapshot, acknowledgeSnapshot, type PatientSnapshot,
+  readPatientSnapshot, acknowledgeSnapshot, flagInteraction, type PatientSnapshot,
 } from "@/lib/firebase/firestore";
 import type { CachedVerdict } from "@/lib/interactionCache";
 import type { RegimenMedicine } from "@/lib/regimen";
+import type { SafeMixVC } from "@/lib/vc";
 
 const systemColor: Record<string, string> = {
   "Allopathic":   "#3B82F6",
@@ -53,6 +55,9 @@ export default function DoctorPortalScanPage() {
   const [ackName, setAckName] = useState("");
   const [ackSent, setAckSent] = useState(false);
   const [ackSending, setAckSending] = useState(false);
+  const [vc, setVc] = useState<SafeMixVC | null>(null);
+  const [vcLoading, setVcLoading] = useState(false);
+  const [flaggedAlertKeys, setFlaggedAlertKeys] = useState<Set<string>>(new Set());
 
   const isRevoked = (t: string) => {
     try {
@@ -340,10 +345,48 @@ export default function DoctorPortalScanPage() {
                     </button>
                   </div>
                   <p className="text-xs" style={{ color: cfg.text }}>{alert.reason}</p>
-                  {showClinical[key] && alert.suggestion && (
-                    <div className="mt-2 pt-2 border-t" style={{ borderColor: cfg.border }}>
-                      <p className="text-xs font-semibold" style={{ color: cfg.text }}>Recommendation:</p>
-                      <p className="text-xs mt-0.5" style={{ color: cfg.text }}>{alert.suggestion}</p>
+                  {showClinical[key] && (
+                    <div className="mt-2 pt-2 border-t space-y-2" style={{ borderColor: cfg.border }}>
+                      {alert.suggestion && (
+                        <div>
+                          <p className="text-xs font-semibold" style={{ color: cfg.text }}>Recommendation:</p>
+                          <p className="text-xs mt-0.5" style={{ color: cfg.text }}>{alert.suggestion}</p>
+                        </div>
+                      )}
+                      {alert.citations && alert.citations.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold" style={{ color: cfg.text }}>Evidence ({alert.citations.length}):</p>
+                          <ul className="mt-1 space-y-0.5">
+                            {alert.citations.map((c) => (
+                              <li key={c} className="text-[11px]" style={{ color: cfg.text }}>• {c}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {!flaggedAlertKeys.has(key) ? (
+                        <button
+                          onClick={async () => {
+                            if (!payload?.jti) return;
+                            if (!ackName.trim()) {
+                              window.alert("Enter your name in the acknowledgement panel before flagging.");
+                              return;
+                            }
+                            await flagInteraction({
+                              shareJti: payload.jti,
+                              alertId: key,
+                              flaggedBy: ackName.trim(),
+                              reason: "Clinician flagged via doctor portal",
+                            });
+                            setFlaggedAlertKeys((prev) => new Set(prev).add(key));
+                          }}
+                          className="text-[11px] font-semibold underline"
+                          style={{ color: cfg.text }}
+                        >
+                          Flag as inaccurate (sends to SafeMix reviewer queue)
+                        </button>
+                      ) : (
+                        <p className="text-[11px] italic" style={{ color: cfg.text }}>Flagged. Reviewer will follow up.</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -395,21 +438,102 @@ export default function DoctorPortalScanPage() {
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-3">
+        {/* Block 5 — Verifiable Credential (PRD §9.4) */}
+        <div className="bg-white rounded-3xl border border-[#e0e8e2] p-5 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="font-bold text-sm text-[#1a2820]">Verifiable Report Receipt</h3>
+              <p className="text-xs text-[#7a9080] mt-0.5">
+                A signed credential of this regimen review you can verify offline with the SafeMix public key.
+              </p>
+            </div>
+            {!vc && (
+              <button
+                onClick={async () => {
+                  if (!payload || !snapshot) return;
+                  setVcLoading(true);
+                  try {
+                    const result = await mintRegimenVC({
+                      patientName: snapshot.patientName ?? "Patient",
+                      patientUid: payload.uid,
+                      shareJti: payload.jti ?? `share_${Date.now()}`,
+                      medications: meds.map((m) => ({
+                        name: m.name, system: m.system, dosage: m.dosage, frequency: m.frequency,
+                      })),
+                      alerts: alerts.map((a) => ({
+                        medicines: a.medicines, verdict: a.verdict, reason: a.reason,
+                      })),
+                      ttlMs: Math.max(15 * 60 * 1000, payload.expiry - Date.now()),
+                    });
+                    setVc(result);
+                  } finally {
+                    setVcLoading(false);
+                  }
+                }}
+                disabled={vcLoading || !snapshot}
+                className="px-3 py-2 rounded-xl bg-[#42594A] text-white text-xs font-semibold disabled:opacity-50"
+              >
+                {vcLoading ? "Signing…" : "Mint VC"}
+              </button>
+            )}
+          </div>
+          {vc && (
+            <div className="rounded-2xl border border-[#cfe9d5] bg-[#f0f8f2] p-3 space-y-2">
+              <div className="flex items-center justify-between text-[11px] text-[#42594A]">
+                <span><strong>Issuer:</strong> {vc.header.issuer}</span>
+                <span>Valid until {new Date(vc.header.expiresAt).toLocaleString("en-IN")}</span>
+              </div>
+              <textarea
+                readOnly
+                value={vc.jws}
+                className="w-full font-mono text-[10px] p-2 rounded-lg bg-white border border-[#cfe9d5] text-[#42594A] break-all"
+                rows={4}
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(vc.jws);
+                }}
+                className="text-[11px] underline text-[#42594A] font-semibold"
+              >
+                Copy JWS
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Actions (Module 4) */}
+        <div className="flex gap-3 flex-wrap">
           <button onClick={handlePrint}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#e0e8e2] text-sm font-medium text-[#52615a] hover:bg-white transition-all">
-            <Printer className="w-4 h-4" /> Print
+            <Printer className="w-4 h-4" /> Print A4
           </button>
           <button onClick={handleDownload}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#e0e8e2] text-sm font-medium text-[#52615a] hover:bg-white transition-all">
-            <Download className="w-4 h-4" /> Download
+            <Download className="w-4 h-4" /> Download .txt
+          </button>
+          <button
+            onClick={() => {
+              if (!payload?.uid || !snapshot) return;
+              const subject = encodeURIComponent("SafeMix regimen review");
+              const lines = [
+                `Patient: ${snapshot.patientName ?? "—"}`,
+                `Generated: ${new Date(snapshot.createdAt).toLocaleString("en-IN")}`,
+                `Medicines: ${meds.length}`,
+                `Active alerts: ${redAlerts.length} red, ${yellowAlerts.length} yellow`,
+                "",
+                ...alerts.map((a) => `[${a.verdict.toUpperCase()}] ${a.medicines.join(" + ")} — ${a.reason}`),
+              ];
+              const body = encodeURIComponent(lines.join("\n"));
+              window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            }}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#e0e8e2] text-sm font-medium text-[#52615a] hover:bg-white transition-all">
+            <Send className="w-4 h-4" /> Email
           </button>
         </div>
 
         {/* Footer */}
         <p className="text-center text-[10px] text-[#9ab0a0] pb-4">
-          SafeMix — For awareness only, not diagnosis. Token verified via HMAC-SHA256 JWT.
+          SafeMix — For awareness only, not diagnosis. Token verified via HMAC-SHA256 JWT. Offline VC verification: <Link href="/security#vc" className="underline">/security#vc</Link>.
         </p>
       </div>
     </div>

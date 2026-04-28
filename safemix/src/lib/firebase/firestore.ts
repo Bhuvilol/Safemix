@@ -194,6 +194,21 @@ export function watchAcknowledgement(
   });
 }
 
+// ─── Doctor flag-as-inaccurate (PRD §8.2 module 3) ───────────────────────────
+// PRD: "≥ 3 unique flags triggers automatic re-review." For MVP we collect the
+// flag and stash it in Firestore so the AI Review Queue picks it up.
+export async function flagInteraction(args: {
+  shareJti: string;
+  alertId: string;
+  flaggedBy: string;
+  reason?: string;
+}): Promise<void> {
+  await addDoc(collection(db, "interaction_flags"), {
+    ...args,
+    createdAt: Date.now(),
+  });
+}
+
 // ─── Migration: localStorage → Firestore ─────────────────────────────────────
 
 export async function migrateLocalStorageToFirestore(uid: string): Promise<void> {
