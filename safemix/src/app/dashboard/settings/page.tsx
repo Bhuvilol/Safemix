@@ -5,62 +5,29 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import Link from "next/link";
 import {
   User, Bell, Shield, Globe, Eye, Type, Clock, LogOut,
-  ChevronRight, Smartphone, Trash2, UserPlus, X, Save, Heart
+  Smartphone, Trash2, Heart, Download, Loader2, Check, AlertTriangle,
 } from "lucide-react";
 import { trackEvent, AnalyticsEvents } from "@/lib/analytics";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface Dependent {
-  name: string;
-  age: string;
-  relationship: string;
-  conditions: string;
-}
-
-const RELATIONSHIPS = ["Spouse", "Mother", "Father", "Child", "Sibling", "Grandparent", "Other"];
-const CONDITIONS = ["Diabetes", "Hypertension", "Heart Disease", "Asthma", "Thyroid", "Kidney Disease", "None"];
+import { LANGUAGES, useT, type LangCode } from "@/lib/i18n";
+import { exportUserData, deleteUserAccount } from "@/app/actions/dpdp";
+import { deleteUser } from "firebase/auth";
 
 const sections = [
-  { id: "account", label: "Account Settings", icon: User },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "family", label: "Family Profiles", icon: Heart },
-  { id: "display", label: "Display", icon: Eye },
-  { id: "language", label: "Language", icon: Globe },
-  { id: "privacy", label: "Privacy & Security", icon: Shield },
+  { id: "account",       label: "Account Settings", icon: User },
+  { id: "notifications", label: "Notifications",     icon: Bell },
+  { id: "family",        label: "Family Profiles",   icon: Heart },
+  { id: "display",       label: "Display",           icon: Eye },
+  { id: "language",      label: "Language",          icon: Globe },
+  { id: "privacy",       label: "Privacy & Consent", icon: Shield },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const [active, setActive] = useState("account");
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { lang, setLang } = useT();
 
-  // Family state — stored in localStorage
-  const [dependents, setDependents] = useState<Dependent[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      return JSON.parse(localStorage.getItem("safemix_dependents") || "[]");
-    } catch { return []; }
-  });
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newDep, setNewDep] = useState<Dependent>({ name: "", age: "", relationship: "", conditions: "" });
-
-  const saveDependent = () => {
-    if (!newDep.name.trim()) return;
-    const updated = [...dependents, newDep].slice(0, 2); // max 2 family profiles
-    setDependents(updated);
-    localStorage.setItem("safemix_dependents", JSON.stringify(updated));
-    setNewDep({ name: "", age: "", relationship: "", conditions: "" });
-    setShowAddForm(false);
-  };
-
-  const removeDependent = (i: number) => {
-    const updated = dependents.filter((_, idx) => idx !== i);
-    setDependents(updated);
-    localStorage.setItem("safemix_dependents", JSON.stringify(updated));
-  };
-
-  const inputCls = "w-full px-4 py-3 rounded-xl border border-[#e0e8e2]  bg-[#F8F8F4]  text-[#1a2820]  text-sm focus:border-[#5E7464] focus:ring-1 focus:ring-[#5E7464] outline-none";
+  const inputCls = "w-full px-4 py-3 rounded-xl border border-[#e0e8e2] bg-[#F8F8F4] text-[#1a2820] text-sm focus:border-[#5E7464] focus:ring-1 focus:ring-[#5E7464] outline-none";
 
   return (
     <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
@@ -94,35 +61,33 @@ export default function SettingsPage() {
           {active === "account" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="flex items-center gap-6 mb-8">
-                <div className="w-20 h-20 rounded-[30px] bg-[#5E7464] flex items-center justify-center text-2xl font-bold text-white shadow-xl">R</div>
+                <div className="w-20 h-20 rounded-[30px] bg-[#5E7464] flex items-center justify-center text-2xl font-bold text-white shadow-xl">
+                  {(user?.displayName?.[0] || user?.phoneNumber?.replace(/\D/g, "")?.slice(-1) || "U").toUpperCase()}
+                </div>
                 <div>
-                  <h2 className="font-manrope font-bold text-xl text-[#1a2820]">Rahul Sharma</h2>
-                  <p className="text-sm text-[#7a9080]">Member since April 2026</p>
-                  <button className="text-xs font-bold text-[#5E7464] hover:underline mt-2">Change Photo</button>
+                  <h2 className="font-manrope font-bold text-xl text-[#1a2820]">{user?.displayName || user?.phoneNumber || "User"}</h2>
+                  <p className="text-sm text-[#7a9080]">{user?.email || user?.phoneNumber || "—"}</p>
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-6">
-                {[
-                  { label: "Full Name", type: "text", value: "Rahul Sharma" },
-                  { label: "Email Address", type: "email", value: "rahul@example.com" },
-                  { label: "Phone Number", type: "tel", value: "+91 98765 43210" },
-                ].map((f) => (
-                  <div key={f.label}>
-                    <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">{f.label}</label>
-                    <input type={f.type} defaultValue={f.value} className={inputCls} />
-                  </div>
-                ))}
-                <div>
-                  <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Blood Group</label>
+                <Field label="Full Name">
+                  <input type="text" defaultValue={user?.displayName ?? ""} className={inputCls} />
+                </Field>
+                <Field label="Email Address">
+                  <input type="email" defaultValue={user?.email ?? ""} className={inputCls} />
+                </Field>
+                <Field label="Phone Number">
+                  <input type="tel" defaultValue={user?.phoneNumber ?? ""} className={inputCls} disabled />
+                </Field>
+                <Field label="Blood Group">
                   <select className={inputCls}>
-                    {["B Positive", "A Positive", "O Negative", "AB Positive"].map((g) => <option key={g}>{g}</option>)}
+                    {["—", "O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"].map((g) => <option key={g}>{g}</option>)}
                   </select>
-                </div>
+                </Field>
               </div>
-              <div className="pt-6 border-t border-[#f0f4f1] flex justify-end gap-3">
-                <button className="px-6 py-2.5 rounded-xl text-sm font-semibold text-[#52615a] hover:bg-[#F8F8F4]">Discard</button>
-                <button className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#42594A] text-white shadow-md hover:shadow-lg transition-all">Save Profile</button>
-              </div>
+              <p className="text-xs text-[#9ab0a0]">Profile editing wires up to Firestore in the family-profile flow ({" "}
+                <Link href="/dashboard/family" className="underline">Manage profiles</Link>).
+              </p>
             </div>
           )}
 
@@ -133,7 +98,7 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 {[
                   { title: "Medication Reminders", desc: "Push notification when it's time to take your dose.", icon: Bell },
-                  { title: "Safety Alerts", desc: "Instant alert when a dangerous interaction is detected.", icon: Shield },
+                  { title: "Safety Alerts",        desc: "Instant alert when a dangerous interaction is detected.", icon: Shield },
                   { title: "Missed Dose Warnings", desc: "Notify you if a dose wasn't logged within 30 minutes.", icon: Clock },
                   { title: "Doctor Portal Access", desc: "Notify you when a doctor reviews your shared profile.", icon: Smartphone },
                 ].map((item) => (
@@ -156,93 +121,17 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* ── Family Profiles ── */}
+          {/* ── Family ── shortcut to the dedicated page */}
           {active === "family" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="font-manrope font-bold text-xl text-[#1a2820]">Family Profiles</h2>
-                  <p className="text-xs text-[#7a9080] mt-1">Manage up to 2 dependents. Each profile has its own medicine list.</p>
-                </div>
-                {dependents.length < 2 && !showAddForm && (
-                  <button onClick={() => setShowAddForm(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#42594A] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all">
-                    <UserPlus className="w-4 h-4" /> Add Dependent
-                  </button>
-                )}
-              </div>
-
-              {/* Existing dependents */}
-              {dependents.length === 0 && !showAddForm && (
-                <div className="text-center py-12 border-2 border-dashed border-[#c3d4c8] rounded-2xl">
-                  <Heart className="w-10 h-10 text-[#c3d4c8] mx-auto mb-3" />
-                  <p className="font-semibold text-[#1a2820] mb-1">No family profiles yet</p>
-                  <p className="text-sm text-[#7a9080] mb-5">Add a parent, spouse, or child to manage their medicines too.</p>
-                  <button onClick={() => setShowAddForm(true)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl"
-                    style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
-                    <UserPlus className="w-4 h-4" /> Add First Dependent
-                  </button>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                {dependents.map((dep, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-[#F8F8F4] border border-[#e0e8e2]">
-                    <div className="w-12 h-12 rounded-2xl bg-[#5E7464] flex items-center justify-center text-white font-bold text-lg">
-                      {dep.name[0]?.toUpperCase() || "?"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-[#1a2820]">{dep.name}</p>
-                      <p className="text-xs text-[#7a9080]">{dep.relationship} · Age {dep.age} · {dep.conditions || "No conditions"}</p>
-                    </div>
-                    <button onClick={() => removeDependent(i)} className="w-8 h-8 rounded-xl hover:bg-red-50 flex items-center justify-center text-[#9ab0a0] hover:text-red-500 transition-colors">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Add form */}
-              {showAddForm && (
-                <div className="p-5 rounded-2xl bg-[#F8F8F4] border border-[#5E7464]/30 space-y-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-bold text-[#1a2820]">New Dependent</h3>
-                    <button onClick={() => setShowAddForm(false)} className="text-[#9ab0a0] hover:text-[#52615a]"><X className="w-4 h-4" /></button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Full Name *</label>
-                      <input type="text" placeholder="e.g. Suman Sharma" value={newDep.name}
-                        onChange={(e) => setNewDep({ ...newDep, name: e.target.value })} className={inputCls} />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Age</label>
-                      <input type="number" placeholder="e.g. 65" min="1" max="120" value={newDep.age}
-                        onChange={(e) => setNewDep({ ...newDep, age: e.target.value })} className={inputCls} />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Relationship</label>
-                      <select value={newDep.relationship} onChange={(e) => setNewDep({ ...newDep, relationship: e.target.value })} className={inputCls}>
-                        <option value="">Select…</option>
-                        {RELATIONSHIPS.map((r) => <option key={r}>{r}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">Primary Condition</label>
-                      <select value={newDep.conditions} onChange={(e) => setNewDep({ ...newDep, conditions: e.target.value })} className={inputCls}>
-                        <option value="">Select…</option>
-                        {CONDITIONS.map((c) => <option key={c}>{c}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <button onClick={saveDependent}
-                    className="w-full py-3 text-sm font-semibold text-white rounded-xl flex items-center justify-center gap-2"
-                    style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
-                    <Save className="w-4 h-4" /> Save Dependent
-                  </button>
-                </div>
-              )}
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-center py-10">
+              <Heart className="w-12 h-12 text-[#5E7464] mx-auto" />
+              <h2 className="font-manrope font-bold text-xl text-[#1a2820]">Family Profiles</h2>
+              <p className="text-sm text-[#7a9080] max-w-sm mx-auto">
+                Manage up to 6 dependents with per-profile consent PINs. Each profile keeps its own regimen and verdicts.
+              </p>
+              <Link href="/dashboard/family" className="inline-flex items-center gap-2 px-6 py-3 bg-[#42594A] text-white text-sm font-semibold rounded-2xl shadow-md hover:shadow-lg">
+                Manage Family Profiles
+              </Link>
             </div>
           )}
 
@@ -250,56 +139,59 @@ export default function SettingsPage() {
           {active === "display" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="font-manrope font-bold text-xl text-[#1a2820] mb-6">Display & Accessibility</h2>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-4">Font Size</label>
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#F8F8F4] border border-[#e0e8e2]">
-                    <Type className="w-4 h-4 text-[#9ab0a0]" />
-                    <input type="range" className="flex-1 accent-[#5E7464]" min="0" max="100" defaultValue="40" />
-                    <Type className="w-6 h-6 text-[#1a2820]" />
-                  </div>
+              <Field label="Font Size">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#F8F8F4] border border-[#e0e8e2]">
+                  <Type className="w-4 h-4 text-[#9ab0a0]" />
+                  <input type="range" className="flex-1 accent-[#5E7464]" min="0" max="100" defaultValue="40" />
+                  <Type className="w-6 h-6 text-[#1a2820]" />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-4">Color Theme</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-2xl border-2 border-[#5E7464] bg-white text-[#1a2820] text-sm font-bold flex items-center justify-between cursor-pointer">
-                      Light Mode<div className="w-4 h-4 rounded-full border-4 border-[#5E7464]" />
-                    </div>
-                    <div className="p-4 rounded-2xl border border-[#e0e8e2] bg-[#1e2820] text-white text-sm font-bold flex items-center justify-between cursor-pointer">
-                      Dark Mode<div className="w-4 h-4 rounded-full border border-white/20" />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              </Field>
+              <p className="text-xs text-[#9ab0a0]">SafeMix is light-mode by design — high contrast for senior users.</p>
             </div>
           )}
 
-          {/* ── Language ── */}
+          {/* ── Language ── real i18n picker */}
           {active === "language" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="font-manrope font-bold text-xl text-[#1a2820] mb-6">Language Settings</h2>
+              <h2 className="font-manrope font-bold text-xl text-[#1a2820] mb-2">App Language</h2>
+              <p className="text-sm text-[#7a9080] mb-4">Pick the language you want SafeMix to speak in. Verdict explanations also use this language.</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {["English", "Hindi", "Tamil", "Telugu", "Bengali", "Marathi", "Gujarati", "Kannada", "Malayalam"].map((lang) => (
-                  <button key={lang} className={`p-4 rounded-2xl border text-sm font-bold transition-all ${ lang === "English" ? "border-[#5E7464] bg-[#f0f8f2] text-[#42594A] " : "border-[#e0e8e2] bg-[#F8F8F4] text-[#7a9080] hover:border-[#5E7464]/40" }`}>{lang}</button>
-                ))}
+                {LANGUAGES.map((l) => {
+                  const active = l.code === lang;
+                  return (
+                    <button
+                      key={l.code}
+                      onClick={() => setLang(l.code as LangCode)}
+                      className={`p-4 rounded-2xl border text-sm font-bold transition-all flex flex-col items-start ${
+                        active ? "border-[#5E7464] bg-[#f0f8f2] text-[#42594A]" : "border-[#e0e8e2] bg-[#F8F8F4] text-[#52615a] hover:border-[#5E7464]/40"
+                      }`}
+                    >
+                      <span>{l.native}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-[#9ab0a0] font-semibold mt-1">{l.label}</span>
+                      {active && <Check className="w-3 h-3 text-[#5E7464] mt-2" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* ── Privacy ── */}
+          {/* ── Privacy & Consent (DPDP rights) ── */}
           {active === "privacy" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-center py-10">
-              <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-6">
-                <Trash2 className="w-10 h-10 text-red-500" />
-              </div>
-              <h2 className="font-manrope font-bold text-xl text-[#1a2820]">Delete Account</h2>
-              <p className="text-sm text-[#7a9080] max-w-sm mx-auto mb-8">
-                This action is permanent and will delete all your medication history and family profiles from our servers.
-              </p>
-              <button className="px-8 py-3 rounded-2xl bg-red-500 text-white font-bold text-sm shadow-lg shadow-red-200 hover:bg-red-600 transition-all">
-                Delete My Data & Account
-              </button>
-            </div>
+            <PrivacyPanel
+              uid={user?.uid ?? null}
+              onAccountDeleted={async () => {
+                if (user) {
+                  try {
+                    await deleteUser(user);
+                  } catch {
+                    // Auth requires a recent login; either way, sign out.
+                  }
+                }
+                await logout();
+                router.replace("/");
+              }}
+            />
           )}
 
         </div>
@@ -314,6 +206,132 @@ export default function SettingsPage() {
             Contact Support
           </Link>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-[#52615a] uppercase tracking-widest mb-2">{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function PrivacyPanel({ uid, onAccountDeleted }: { uid: string | null; onAccountDeleted: () => Promise<void> }) {
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [confirmText, setConfirmText] = useState("");
+
+  const handleExport = async () => {
+    if (!uid) return;
+    setExporting(true);
+    setExportError(null);
+    try {
+      const archive = await exportUserData(uid);
+      const blob = new Blob([JSON.stringify(archive, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `safemix-export-${uid.slice(0, 8)}-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      trackEvent(AnalyticsEvents.DATA_EXPORTED);
+    } catch (e) {
+      setExportError((e as Error).message);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!uid) return;
+    if (confirmText.trim().toUpperCase() !== "DELETE") {
+      setDeleteError("Type DELETE to confirm.");
+      return;
+    }
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteUserAccount(uid);
+      trackEvent(AnalyticsEvents.ACCOUNT_DELETED);
+      // Best-effort: also clear local caches.
+      if (typeof window !== "undefined") {
+        ["safemix_regimen", "safemix_interaction_cache", "safemix_dependents", "safemix_family_profiles", "safemix_active_profile", "safemix_revoked_tokens"]
+          .forEach((k) => localStorage.removeItem(k));
+      }
+      await onAccountDeleted();
+    } catch (e) {
+      setDeleteError((e as Error).message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+      <div>
+        <h2 className="font-manrope font-bold text-xl text-[#1a2820]">Privacy & Consent</h2>
+        <p className="text-sm text-[#7a9080] mt-1">
+          Under the DPDP Act, you have the right to a copy of your data and the right to erasure. SafeMix fulfils both within 30 days of request.
+        </p>
+      </div>
+
+      {/* Export */}
+      <div className="rounded-2xl border border-[#e0e8e2] bg-[#F8F8F4] p-5 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-[#1a2820]">Export My Data</h3>
+            <p className="text-xs text-[#7a9080] mt-0.5">
+              Download a JSON archive of every collection under your account: medications, verdicts, reminders, shares, profiles, adverse events.
+            </p>
+          </div>
+          <button
+            onClick={handleExport}
+            disabled={!uid || exporting}
+            className="px-4 py-2.5 rounded-xl bg-[#42594A] text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+          >
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {exporting ? "Preparing…" : "Download archive"}
+          </button>
+        </div>
+        {exportError && <p className="text-xs text-red-600">{exportError}</p>}
+      </div>
+
+      {/* Delete */}
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 space-y-3">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+            <Trash2 className="w-5 h-5 text-red-500" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-red-700">Delete Account</h3>
+            <p className="text-xs text-red-600 mt-0.5">
+              Permanently erases your regimen, verdicts, reminders, family profiles, and shares. This cannot be undone.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder='Type "DELETE" to confirm'
+            className="flex-1 px-4 py-2.5 rounded-xl border border-red-200 bg-white text-sm text-[#1a2820] outline-none focus:border-red-400"
+          />
+          <button
+            onClick={handleDelete}
+            disabled={!uid || deleting || confirmText.trim().toUpperCase() !== "DELETE"}
+            className="px-5 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+          >
+            {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+            {deleting ? "Erasing…" : "Delete account"}
+          </button>
+        </div>
+        {deleteError && <p className="text-xs text-red-700">{deleteError}</p>}
       </div>
     </div>
   );
