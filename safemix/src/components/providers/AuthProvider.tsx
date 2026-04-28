@@ -28,17 +28,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const migratedRef = useRef<string | null>(null); // track which uid we've already migrated
+  const initializedRef = useRef(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
+      initializedRef.current = true;
 
       const isPublic = PUBLIC_PATHS.some(
         (p) => pathname === p || pathname.startsWith(p + "/")
       );
 
-      if (!firebaseUser && !isPublic) {
+      // Avoid premature guard redirects before auth state is fully initialized.
+      if (!firebaseUser && !isPublic && initializedRef.current) {
         router.replace("/login");
         return;
       }
