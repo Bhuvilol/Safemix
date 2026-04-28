@@ -42,8 +42,8 @@ export default function AdrReviewPage() {
   useEffect(() => { loadReports(); }, []);
 
   return (
-    <div className="min-h-screen bg-[#F4F7F5] p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div>
+      <div className="space-y-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">

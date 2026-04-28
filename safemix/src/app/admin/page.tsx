@@ -100,7 +100,7 @@ export default function AdminPage() {
   const inputCls = "w-full px-3 py-2 rounded-xl border border-[#e0e8e2] bg-[#F8F8F4] text-[#1a2820] text-sm focus:border-[#5E7464] outline-none";
 
   return (
-    <div className="min-h-screen bg-[#F8FAF8] p-4 md:p-8">
+    <div>
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Header */}
