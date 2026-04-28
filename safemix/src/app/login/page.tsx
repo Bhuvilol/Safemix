@@ -6,6 +6,8 @@ import SafeMixLogo from "@/components/ui/Logo";
 import { ArrowRight, Phone, ShieldCheck, AlertCircle, ChevronLeft } from "lucide-react";
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -48,16 +50,51 @@ export default function LoginPage() {
     }
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (!result?.user) return;
+        router.replace("/dashboard");
+      } catch (e: any) {
+        if (e?.code === "auth/popup-closed-by-user") {
+          setError("Google sign-in was interrupted. Please try again.");
+        } else if (e?.code === "auth/popup-blocked") {
+          setError("Google popup was blocked by browser. Please try again.");
+        } else if (e?.code) {
+          setError(`Google sign-in failed (${e.code}).`);
+        } else {
+          setError("Google sign-in failed.");
+        }
+      }
+    })();
+  }, [router]);
+
   // ── Google Sign-In ──────────────────────────────────────────────────────────
   const handleGoogle = async () => {
     setError("");
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      const isMobile =
+        typeof window !== "undefined" &&
+        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+
       await signInWithPopup(auth, provider);
       router.replace("/dashboard");
     } catch (e: any) {
-      setError(e.message || "Google sign-in failed.");
+      if (e?.code === "auth/popup-closed-by-user") {
+        setError("Google sign-in popup was closed. Please retry, or use Phone OTP.");
+      } else if (e?.code === "auth/popup-blocked") {
+        setError("Google popup blocked by browser. Please retry, or use Phone OTP.");
+      } else {
+        setError(e.message || "Google sign-in failed.");
+      }
       setLoading(false);
     }
   };
