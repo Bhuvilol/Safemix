@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, X, Send, Mic, Loader2, MicOff } from "lucide-react";
 import { trackEvent, AnalyticsEvents } from "@/lib/analytics";
+import { getLanguage, type LangCode } from "@/lib/i18n";
 
 interface Message {
   role: "user" | "assistant";
@@ -37,10 +38,11 @@ export default function FloatingAIAssistant() {
     await trackEvent(AnalyticsEvents.ASSISTANT_INVOKED, { prompt_length: userMsg.length });
 
     try {
+      const language = getLanguage() as LangCode;
       const resp = await fetch("/api/ai-assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg }),
+        body: JSON.stringify({ message: userMsg, language }),
       });
       const data = await resp.json();
       setMessages(prev => [...prev, { role: "assistant", text: data.reply || "I'm having trouble answering that. Please try again." }]);

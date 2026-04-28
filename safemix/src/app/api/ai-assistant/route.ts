@@ -8,7 +8,28 @@ You answer questions about herb-drug interactions, AYUSH medicines, timing of do
 You speak warmly and clearly. You cover both Ayurvedic and allopathic medicines, and you understand Indian brands.
 Respond in ${langName}.
 Always end your response with a brief reminder that this is for awareness, not diagnosis.
-Keep responses concise — 60 to 120 words. Use simple language. Never recommend or prescribe.`;
+Keep responses concise but complete — 90 to 160 words.
+Structure:
+1) Direct answer
+2) Why it matters (1 sentence)
+3) What to do now (2-3 bullets max)
+Never prescribe, diagnose, or give unsafe dosing advice.`;
+
+function extractTextFromResponse(response: any): string {
+  const parts: string[] = [];
+  const candidates = response?.candidates ?? [];
+  for (const c of candidates) {
+    const p = c?.content?.parts ?? [];
+    for (const part of p) {
+      if (typeof part?.text === "string" && part.text.trim()) {
+        parts.push(part.text.trim());
+      }
+    }
+  }
+  if (parts.length > 0) return parts.join("\n\n");
+  if (typeof response?.text === "string" && response.text.trim()) return response.text.trim();
+  return "";
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +52,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const reply = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+    const reply = extractTextFromResponse(response)
       || "I couldn't generate a response. Please try again.";
 
     return NextResponse.json({ reply });

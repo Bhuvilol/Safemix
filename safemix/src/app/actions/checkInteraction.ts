@@ -34,6 +34,7 @@ export async function checkInteraction(
   existingMedicines: string[],
   language: LangCode = "en"
 ): Promise<InteractionResult> {
+  try {
 
   // ── Stage 1: Deterministic Rule Engine (<50ms) ────────────────────────────
   const ruleResult = lookupInteraction(medicineName, existingMedicines);
@@ -118,4 +119,19 @@ Verdict rules:
   });
 
   return { ...parsed, source: "ai", reviewQueueId };
+  } catch (err) {
+    console.error("[SafeMix] checkInteraction failed:", err);
+    // Never throw raw server-action errors to client UI in production.
+    return {
+      verdict: "yellow",
+      medicines: [medicineName, ...existingMedicines.slice(0, 1)],
+      reason: "We could not complete the AI interaction analysis right now.",
+      suggestion: "Please retry in a moment or verify this combination with your doctor/pharmacist before taking it.",
+      confidence: "low",
+      source: "ai",
+      citations: ["SafeMix fallback response (analysis unavailable)"],
+      plainExplanation: "Analysis could not be completed right now. Please retry or consult a doctor/pharmacist before taking this combination.",
+      reviewQueueId: null,
+    };
+  }
 }
