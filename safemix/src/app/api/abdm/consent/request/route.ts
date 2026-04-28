@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAbdmConfig } from "@/lib/abdmConfig";
-import { getAdminDb } from "@/lib/firebase/admin";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
 import { defaultConsentWindowDays } from "@/lib/abdm";
 
 async function getAbdmAccessToken(baseUrl: string, tokenPath: string, tokenField: string, clientId: string, clientSecret: string): Promise<string> {
@@ -55,6 +55,19 @@ async function sendConsentRequestToAbdm(args: {
 
 export async function POST(req: NextRequest) {
   try {
+    let actorUid: string | null = null;
+    let actorRole: string | null = null;
+    const authz = req.headers.get("authorization") ?? "";
+    if (authz.startsWith("Bearer ")) {
+      try {
+        const decoded = await getAdminAuth().verifyIdToken(authz.slice("Bearer ".length));
+        actorUid = decoded.uid;
+        actorRole = String(decoded.role ?? "");
+      } catch {
+        // best-effort actor capture only
+      }
+    }
+
     const { uid, purpose, hiTypes, days } = await req.json() as {
       uid: string;
       purpose: "medication_safety" | "doctor_share" | "research_aggregate";
@@ -85,7 +98,15 @@ export async function POST(req: NextRequest) {
 
     const db = getAdminDb();
     await db.collection("users").doc(uid).collection("abdm_consents").doc(requestId).set(payload, { merge: true });
-    await db.collection("audits").add({ createdAt: Date.now(), action: "abdm_consent_request", uid, requestId, status: payload.status });
+    await db.collection("audits").add({
+      createdAt: Date.now(),
+      action: "abdm_consent_request",
+      uid,
+      requestId,
+      status: payload.status,
+      actorUid,
+      actorRole,
+    });
 
     if (!cfg.enabled) {
       await db.collection("users").doc(uid).collection("abdm_consents").doc(requestId).set(

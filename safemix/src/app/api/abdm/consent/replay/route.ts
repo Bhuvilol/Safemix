@@ -9,6 +9,7 @@ async function requireAdmin(req: NextRequest) {
   const decoded = await getAdminAuth().verifyIdToken(token);
   const role = String(decoded.role ?? "");
   if (role !== "admin" && role !== "reviewer") throw new Error("insufficient role");
+  return { uid: decoded.uid, role };
 }
 
 async function getAccessToken(baseUrl: string, tokenPath: string, tokenField: string, clientId: string, clientSecret: string) {
@@ -26,7 +27,7 @@ async function getAccessToken(baseUrl: string, tokenPath: string, tokenField: st
 
 export async function POST(req: NextRequest) {
   try {
-    await requireAdmin(req);
+    const actor = await requireAdmin(req);
     const cfg = getAbdmConfig();
     if (!cfg.enabled) return NextResponse.json({ error: "ABDM gateway not configured" }, { status: 400 });
 
@@ -81,7 +82,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    await db.collection("audits").add({ createdAt: Date.now(), action: "abdm_consent_replay", total: queuedSnap.size, success, failed });
+    await db.collection("audits").add({
+      createdAt: Date.now(),
+      action: "abdm_consent_replay",
+      total: queuedSnap.size,
+      success,
+      failed,
+      actorUid: actor.uid,
+      actorRole: actor.role,
+    });
     return NextResponse.json({ ok: true, total: queuedSnap.size, success, failed, results });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
