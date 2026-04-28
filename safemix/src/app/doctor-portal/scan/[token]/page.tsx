@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { AlertTriangle, CheckCircle, AlertCircle, Clock, Shield, Pill, XCircle, Printer, Download } from "lucide-react";
 import Link from "next/link";
+import { verifyDoctorToken } from "@/lib/qrToken";
 
 // Medicine data that would come from Firestore in production
 const DEMO_REGIMEN = [
@@ -31,15 +32,6 @@ interface TokenPayload {
   issued: number;
 }
 
-function decodeToken(token: string): TokenPayload | null {
-  try {
-    const decoded = JSON.parse(atob(decodeURIComponent(token)));
-    return decoded as TokenPayload;
-  } catch {
-    return null;
-  }
-}
-
 export default function DoctorPortalScanPage() {
   const params = useParams();
   const token = params?.token as string | undefined;
@@ -53,9 +45,6 @@ export default function DoctorPortalScanPage() {
   useEffect(() => {
     if (!token) { setStatus("invalid"); return; }
 
-    const decoded = decodeToken(token);
-    if (!decoded) { setStatus("invalid"); return; }
-
     // Helper: check if this token is in the revoked list
     const isRevoked = () => {
       const revoked: string[] = JSON.parse(localStorage.getItem("safemix_revoked_tokens") || "[]");
@@ -65,26 +54,51 @@ export default function DoctorPortalScanPage() {
     // 1. Check revocation registry immediately on load
     if (isRevoked()) { setStatus("revoked"); return; }
 
-    // 2. Check expiry
-    setPayload(decoded);
-    if (Date.now() > decoded.expiry) {
-      setStatus("expired");
-      return;
-    }
+    // 2. Verify JWT signature + expiry
+    verifyDoctorToken(decodeURIComponent(token))
+      .then((jwtPayload) => {
+        const decoded: TokenPayload = {
+          uid: jwtPayload.uid,
+          expiry: jwtPayload.expiry,
+          issued: jwtPayload.issued,
+        };
+        setPayload(decoded);
 
-    setStatus("valid");
+        if (Date.now() > decoded.expiry) {
+          setStatus("expired");
+          return;
+        }
 
-    // 3. Listen for cross-tab revocation in real time
-    //    The "storage" event fires instantly in OTHER tabs when localStorage changes
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === "safemix_revoked_tokens" && isRevoked()) {
-        setStatus("revoked");
-      }
+        setStatus("valid");
+
+        // 3. Listen for cross-tab revocation in real time
+        const handleStorage = (e: StorageEvent) => {
+          if (e.key === "safemix_revoked_tokens" && isRevoked()) {
+            setStatus("revoked");
+          }
+        };
+        window.addEventListener("storage", handleStorage);
+        // Return cleanup — but can't return from .then, so store in a variable
+      })
+      .catch(() => {
+        // JWT verification failed — token is invalid or tampered
+        setStatus("invalid");
+      });
+  }, [token]);
+
+  // Storage event listener for real-time revocation (set up separately)
+  useEffect(() => {
+    if (status !== "valid" || !token) return;
+    const isRevoked = () => {
+      const revoked: string[] = JSON.parse(localStorage.getItem("safemix_revoked_tokens") || "[]");
+      return revoked.includes(token);
     };
-
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "safemix_revoked_tokens" && isRevoked()) setStatus("revoked");
+    };
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
-  }, [token]);
+  }, [status, token]);
 
   // Live countdown — runs on mount and ticks every second
   useEffect(() => {

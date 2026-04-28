@@ -4,6 +4,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { QrCode, Clock, Shield, Share2, ArrowRight, History, Copy, CheckCheck } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { trackEvent, AnalyticsEvents } from "@/lib/analytics";
+import { generateDoctorToken } from "@/lib/qrToken";
+import { logShare } from "@/lib/firebase/firestore";
 
 const pastShares = [
   { id: "S123", doctor: "Dr. Sharma", hospital: "Apollo Hospitals", date: "24 Apr 2026", expiry: "Expired", status: "Expired" },
@@ -58,21 +60,37 @@ export default function DoctorSharePage() {
   const handleGenerate = () => {
     setGenerating(true);
     setTimeout(async () => {
-      const uid = user?.uid || `guest_${Date.now()}`;
-      const issued = Date.now();
-      const expiryTime = issued + (expiryMs[expiry] || 3600000);
-      const payload = { uid, expiry: expiryTime, issued };
-      const token = encodeURIComponent(btoa(JSON.stringify(payload)));
-      // Store in localStorage
-      const shares = JSON.parse(localStorage.getItem("safemix_shares") || "[]");
-      shares.unshift({ token, doctor: "Doctor", issued, expiry: expiryTime, duration: expiry });
-      localStorage.setItem("safemix_shares", JSON.stringify(shares.slice(0, 10)));
-      const url = `${window.location.origin}/doctor-portal/scan/${token}`;
-      setQrUrl(url);
-      setExpiryTimestamp(expiryTime); // start the live countdown
-      setGenerating(false);
-      setQrGenerated(true);
-      await trackEvent(AnalyticsEvents.QR_GENERATED, { expiry });
+      try {
+        const uid = user?.uid || `guest_${Date.now()}`;
+        const durationMs = expiryMs[expiry] || 3600000;
+        const issued = Date.now();
+        const expiryTime = issued + durationMs;
+
+        // Generate HMAC-SHA256 signed JWT — cannot be forged or tampered
+        const token = await generateDoctorToken(uid, durationMs);
+        const encodedToken = encodeURIComponent(token);
+
+        // Store in localStorage for share history UI
+        const shares = JSON.parse(localStorage.getItem("safemix_shares") || "[]");
+        shares.unshift({ token: encodedToken, doctor: "Doctor", issued, expiry: expiryTime, duration: expiry });
+        localStorage.setItem("safemix_shares", JSON.stringify(shares.slice(0, 10)));
+
+        const url = `${window.location.origin}/doctor-portal/scan/${encodedToken}`;
+        setQrUrl(url);
+        setExpiryTimestamp(expiryTime);
+        setGenerating(false);
+        setQrGenerated(true);
+
+        // Log share to Firestore
+        if (user?.uid) {
+          logShare(user.uid, { token: encodedToken, issued, expiry: expiryTime, duration: expiry }).catch(console.error);
+        }
+
+        await trackEvent(AnalyticsEvents.QR_GENERATED, { expiry });
+      } catch (err) {
+        console.error("[SafeMix] Token generation failed:", err);
+        setGenerating(false);
+      }
     }, 1200);
   };
 

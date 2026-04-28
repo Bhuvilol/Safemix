@@ -15,6 +15,7 @@ import {
   getRegimen, addToRegimen, removeFromRegimen, getRegimenNames,
   type RegimenMedicine,
 } from "@/lib/regimen";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const SYSTEMS = ["Allopathic", "Ayurvedic", "Homeopathic", "Herbal / Plant-based", "OTC", "Home Remedy", "Supplement"];
@@ -45,6 +46,8 @@ const EMPTY_FORM = { name: "", system: "", dosage: "", frequency: "", timing: ""
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function AddMedicinePage() {
+  const { user } = useAuth();
+  const uid = user?.uid ?? null;
   const [tab, setTab] = useState<"search" | "ocr" | "voice" | "past">("search");
   const [form, setForm] = useState(EMPTY_FORM);
   const [checking, setChecking] = useState(false);
@@ -285,7 +288,9 @@ export default function AddMedicinePage() {
         medicines: data.medicines,
         reason: data.reason,
         suggestion: data.suggestion,
-      });
+        confidence: data.confidence,
+        source: data.source,
+      }, uid);
       await trackEvent(AnalyticsEvents.INTERACTION_CHECK, { verdict: data.verdict, medicine: form.name.trim() });
     } catch (err: any) {
       setError(err.message || "Failed to check interactions. Please try again.");
@@ -301,7 +306,7 @@ export default function AddMedicinePage() {
       name: form.name, system: form.system, dosage: form.dosage,
       frequency: form.frequency, timing: form.timing,
       withFood: form.withFood, startDate: form.startDate,
-    });
+    }, uid);
     setRegimen(getRegimen());
     setAddedSuccess(true);
     setTimeout(() => {
@@ -312,7 +317,7 @@ export default function AddMedicinePage() {
   };
 
   const handleRemoveFromRegimen = (id: string) => {
-    removeFromRegimen(id);
+    removeFromRegimen(id, uid);
     setRegimen(getRegimen());
   };
 

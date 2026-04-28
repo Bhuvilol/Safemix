@@ -3,6 +3,7 @@ import { useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import BottomNav from "@/components/layout/BottomNav";
+import { ToastContainer } from "@/components/ui/ToastNotification";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,6 +26,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Mobile Navigation */}
         <BottomNav />
       </div>
+
+      {/* Global toast notifications (FCM foreground messages) */}
+      <ToastContainer />
     </div>
   );
 }

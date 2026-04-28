@@ -1,5 +1,6 @@
 "use server";
 import { GoogleGenAI } from "@google/genai";
+import { lookupInteraction } from "@/lib/interactionRules";
 
 export interface InteractionResult {
   verdict: "red" | "yellow" | "green";
@@ -7,6 +8,8 @@ export interface InteractionResult {
   reason: string;
   suggestion: string;
   confidence: "high" | "medium" | "low";
+  /** "rules" = deterministic DB hit (<50ms) | "ai" = Gemini fallback */
+  source?: "rules" | "ai";
 }
 
 export async function checkInteraction(
@@ -14,12 +17,19 @@ export async function checkInteraction(
   medicineSystem: string,
   existingMedicines: string[]
 ): Promise<InteractionResult> {
+
+  // ── Stage 1: Deterministic Rule Engine (<50ms) ────────────────────────────
+  const ruleResult = lookupInteraction(medicineName, existingMedicines);
+  if (ruleResult) {
+    return ruleResult; // Instant — no API call needed
+  }
+
+  // ── Stage 2: Gemini AI Reasoning (fallback for unknown pairs) ─────────────
   const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
   if (!apiKey) throw new Error("Gemini API key is not configured.");
 
   const ai = new GoogleGenAI({ apiKey });
 
-  // If no existing medicines, just validate the medicine name
   const context =
     existingMedicines.length > 0
       ? `The patient is already taking: ${existingMedicines.join(", ")}.`
@@ -69,5 +79,5 @@ Verdict rules:
     parsed.medicines = [medicineName, ...parsed.medicines];
   }
 
-  return parsed;
+  return { ...parsed, source: "ai" };
 }

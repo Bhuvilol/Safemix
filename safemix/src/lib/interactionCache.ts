@@ -1,7 +1,11 @@
 /**
- * Interaction Cache — persists AI verdict results in localStorage
- * so the Dashboard can display real alerts without re-calling the API.
+ * Interaction verdict cache — persists AI + rule results.
+ *
+ * Strategy: Write-through cache
+ * - Reads hit localStorage immediately (instant, offline-safe)
+ * - Writes go to both localStorage and Firestore (when UID available)
  */
+import { saveVerdictFirestore } from "@/lib/firebase/firestore";
 
 export interface CachedVerdict {
   id: string;            // unique: medicine name slug
@@ -11,6 +15,8 @@ export interface CachedVerdict {
   medicines: string[];   // Pair involved
   reason: string;
   suggestion: string;
+  confidence?: "high" | "medium" | "low";
+  source?: "rules" | "ai";  // Stage 1 (deterministic) or Stage 2 (Gemini)
   checkedAt: number;     // epoch ms
 }
 
@@ -27,15 +33,25 @@ export function getCachedVerdicts(): CachedVerdict[] {
   }
 }
 
-export function saveVerdict(verdict: Omit<CachedVerdict, "id" | "checkedAt">): void {
+export function saveVerdict(
+  verdict: Omit<CachedVerdict, "id" | "checkedAt">,
+  uid?: string | null
+): void {
   if (typeof window === "undefined") return;
+
   const all = getCachedVerdicts();
   const id = verdict.medicine.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
-  // Replace existing entry for same medicine
   const filtered = all.filter((v) => v.id !== id);
   const entry: CachedVerdict = { ...verdict, id, checkedAt: Date.now() };
   const updated = [entry, ...filtered].slice(0, MAX_ENTRIES);
   localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
+
+  // Fire-and-forget Firestore sync
+  if (uid) {
+    saveVerdictFirestore(uid, entry).catch((err) =>
+      console.error("[SafeMix] Firestore saveVerdict failed:", err)
+    );
+  }
 }
 
 export function clearVerdictCache(): void {
