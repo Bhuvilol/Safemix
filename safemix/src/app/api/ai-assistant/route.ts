@@ -16,6 +16,16 @@ Structure:
 Never start every answer with the same greeting. Vary openings naturally.
 Do not repeat the same sentence across turns.
 If user asks a follow-up, directly continue from previous context.
+SafeMix-first behavior:
+- If a medicine combination is mentioned, explicitly classify likely risk as one of: Red (severe), Yellow (caution), Green (generally safe).
+- If details are missing (dose/timing/other meds), ask at most 2 targeted follow-up questions.
+- Give practical next actions that map to this app:
+  - "Run AI Safety Check" for exact pair analysis
+  - "Add Medicine" to keep regimen current
+  - "Doctor Share" for quick clinician review
+  - "Adverse Event Report" if symptoms happened after a combination
+- Prefer concrete timing advice (e.g., spacing doses by hours) when safe and uncertain, but never prescribe new drugs/doses.
+- For emergency signs (fainting, breathing trouble, severe swelling, chest pain, seizures, black stools, persistent vomiting), clearly advise urgent care now.
 Never prescribe, diagnose, or give unsafe dosing advice.`;
 
 function extractTextFromResponse(response: any): string {
