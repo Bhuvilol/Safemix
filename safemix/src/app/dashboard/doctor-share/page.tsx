@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
-import { QrCode, Clock, Shield, Share2, ArrowRight, History } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { QrCode, Clock, Shield, Share2, ArrowRight, History, Copy, CheckCheck } from "lucide-react";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { trackEvent, AnalyticsEvents } from "@/lib/analytics";
 
 const pastShares = [
   { id: "S123", doctor: "Dr. Sharma", hospital: "Apollo Hospitals", date: "24 Apr 2026", expiry: "Expired", status: "Expired" },
@@ -8,16 +11,41 @@ const pastShares = [
 ];
 
 export default function DoctorSharePage() {
+  const { user } = useAuth();
   const [expiry, setExpiry] = useState("1 hour");
   const [generating, setGenerating] = useState(false);
   const [qrGenerated, setQrGenerated] = useState(false);
+  const [qrUrl, setQrUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const expiryMs: Record<string, number> = {
+    "15 min": 15 * 60 * 1000,
+    "1 hour": 60 * 60 * 1000,
+    "24 hour": 24 * 60 * 60 * 1000,
+  };
 
   const handleGenerate = () => {
     setGenerating(true);
-    setTimeout(() => {
+    setTimeout(async () => {
+      const uid = user?.uid || `guest_${Date.now()}`;
+      const issued = Date.now();
+      const expiryTime = issued + (expiryMs[expiry] || 3600000);
+      const payload = { uid, expiry: expiryTime, issued };
+      const token = encodeURIComponent(btoa(JSON.stringify(payload)));
+      // Store in localStorage
+      const shares = JSON.parse(localStorage.getItem("safemix_shares") || "[]");
+      shares.unshift({ token, doctor: "Doctor", issued, expiry: expiryTime, duration: expiry });
+      localStorage.setItem("safemix_shares", JSON.stringify(shares.slice(0, 10)));
+      const url = `${window.location.origin}/doctor-portal/scan/${token}`;
+      setQrUrl(url);
       setGenerating(false);
       setQrGenerated(true);
-    }, 1500);
+      await trackEvent(AnalyticsEvents.QR_GENERATED, { expiry });
+    }, 1200);
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(qrUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   };
 
   return (
@@ -82,11 +110,13 @@ export default function DoctorSharePage() {
             </>
           ) : (
             <div className="text-center space-y-6 animate-in fade-in zoom-in duration-300">
-              <div className="w-48 h-48 mx-auto bg-white p-4 rounded-3xl border-4 border-[#f0f8f2] shadow-sm relative group">
-                <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://safemix.ai/doctor-portal/view/S125" 
-                  alt="Doctor Portal QR"
-                  className="w-full h-full opacity-90 group-hover:opacity-100 transition-opacity"
+              <div className="w-48 h-48 mx-auto bg-white p-4 rounded-3xl border-4 border-[#f0f8f2] shadow-sm relative group flex items-center justify-center">
+                <QRCodeSVG
+                  value={qrUrl}
+                  size={160}
+                  fgColor="#1a2820"
+                  bgColor="#ffffff"
+                  level="M"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">
                   <span className="text-xs font-bold text-[#42594A]">SCAN TO VIEW</span>
@@ -102,9 +132,9 @@ export default function DoctorSharePage() {
               </div>
 
               <div className="flex gap-3">
-                <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#e0e8e2] dark:border-white/10 text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] hover:bg-[#f0f5f1] dark:hover:bg-[#2a3430] transition-all">
-                  <Share2 className="w-3.5 h-3.5" />
-                  Copy Link
+                <button onClick={copyLink}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#e0e8e2] dark:border-white/10 text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] hover:bg-[#f0f5f1] dark:hover:bg-[#2a3430] transition-all">
+                  {copied ? <><CheckCheck className="w-3.5 h-3.5 text-emerald-500" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy Link</>}
                 </button>
                 <button onClick={() => setQrGenerated(false)} className="flex-1 py-3 rounded-2xl bg-[#f0f5f1] dark:bg-[#2a3430] text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] hover:bg-[#e0e8e2] dark:hover:bg-[#344038] transition-all">
                   Revoke Now

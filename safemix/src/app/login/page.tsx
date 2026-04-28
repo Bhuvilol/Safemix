@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SafeMixLogo from "@/components/ui/Logo";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-4 h-4">
@@ -16,6 +17,7 @@ const GoogleIcon = () => (
 
 export default function LoginPage() {
   const router = useRouter();
+  const { loginLocal } = useAuth();
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ credential: "", password: "" });
@@ -23,7 +25,10 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => router.push("/dashboard"), 1200);
+    // Bypass: create a local session using the credential as phone/email
+    const uid = "user_login_" + Math.random().toString(36).substr(2, 9);
+    loginLocal(uid, form.credential || "+91-login-user");
+    setTimeout(() => router.push("/dashboard"), 800);
   };
 
   return (
@@ -134,7 +139,12 @@ export default function LoginPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => { setLoading(true); setTimeout(() => router.push("/dashboard"), 1000); }}
+              onClick={() => { 
+                setLoading(true); 
+                const uid = "user_google_" + Math.random().toString(36).substr(2, 9);
+                loginLocal(uid, "google-user@gmail.com");
+                setTimeout(() => router.push("/dashboard"), 800); 
+              }}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-sm font-medium text-[#1a2820] dark:text-white hover:border-[#5E7464]/40 hover:bg-[#f4f8f5] dark:hover:bg-[#2a3430] transition-all"
             >
               <GoogleIcon />

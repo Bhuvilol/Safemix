@@ -14,7 +14,8 @@ import {
   ArrowRight,
   ShieldCheck,
   ChevronRight,
-  ClipboardCheck
+  ClipboardCheck,
+  Zap
 } from "lucide-react";
 
 const patientData = {

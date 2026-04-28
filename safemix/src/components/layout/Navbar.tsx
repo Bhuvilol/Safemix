@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import SafeMixLogo from "@/components/ui/Logo";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -21,6 +22,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     const stored = localStorage.getItem("safemix-dark");
@@ -89,7 +92,7 @@ export default function Navbar() {
               {dark ? <Sun className="w-[15px] h-[15px]" /> : <Moon className="w-[15px] h-[15px]" />}
             </button>
 
-            {!isDash && (
+            {(!isDash && !isLoggedIn) && (
               <>
                 <Link href="/login"
                   className="px-4 py-2 text-sm font-semibold text-[#42594A] dark:text-[#9ab0a0] hover:bg-[#f0f5f1] dark:hover:bg-[#202820] rounded-lg transition-colors"
@@ -103,6 +106,14 @@ export default function Navbar() {
                   Get Started
                 </Link>
               </>
+            )}
+            {(!isDash && isLoggedIn) && (
+              <Link href="/dashboard"
+                className="px-5 py-2 text-sm font-semibold text-white rounded-full shadow-[0_4px_12px_rgba(94,116,100,0.3)]"
+                style={{ background: "linear-gradient(135deg, #5E7464 0%, #42594A 100%)" }}
+              >
+                My Dashboard
+              </Link>
             )}
             {isDash && (
               <Link href="/dashboard"

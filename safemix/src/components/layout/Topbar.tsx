@@ -1,16 +1,27 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bell, Search, ChevronDown, Sun, Moon, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 interface TopbarProps {
   onMenuClick?: () => void;
 }
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
+  const { user, logoutLocal } = useAuth();
+  const router = useRouter();
   const [showProfile, setShowProfile] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [dark, setDark] = useState(false);
+
+  // Derive display name / initial from stored phone or uid
+  const displayPhone = user?.phoneNumber || "";
+  const initial = displayPhone.replace(/\D/g, "").charAt(0) || "U";
+  const displayName = displayPhone.startsWith("+91") || displayPhone.includes("@")
+    ? displayPhone
+    : displayPhone || "User";
 
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));
@@ -89,11 +100,11 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
           <button onClick={() => { setShowProfile(!showProfile); setShowNotif(false); }}
             className="flex items-center gap-2 pl-2 hover:opacity-80 transition-opacity"
           >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold font-manrope" style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
-              R
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold font-manrope uppercase" style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
+              {initial}
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-sm font-semibold text-[#1a2820] dark:text-white leading-none">Rahul Sharma</p>
+              <p className="text-sm font-semibold text-[#1a2820] dark:text-white leading-none truncate max-w-[120px]">{displayName}</p>
               <p className="text-xs text-[#9ab0a0] mt-0.5">Patient</p>
             </div>
             <ChevronDown className="w-4 h-4 text-[#9ab0a0] hidden md:block" />
@@ -111,9 +122,12 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
                 </Link>
               ))}
               <div className="border-t border-[#e0e8e2] dark:border-white/10 mt-1 pt-1">
-                <Link href="/" className="block px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors">
+                <button
+                  onClick={() => { logoutLocal(); setShowProfile(false); router.push("/"); }}
+                  className="w-full text-left block px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors"
+                >
                   Sign Out
-                </Link>
+                </button>
               </div>
             </div>
           )}

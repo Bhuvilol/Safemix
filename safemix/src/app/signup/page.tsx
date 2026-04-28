@@ -3,149 +3,227 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SafeMixLogo from "@/components/ui/Logo";
-import { Eye, EyeOff, Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 const roles = [
   { id: "patient", label: "Patient", desc: "Managing my own medicines", icon: "person" },
   { id: "caregiver", label: "Caregiver", desc: "Managing medicines for family", icon: "family_restroom" },
-  { id: "doctor", label: "Doctor", desc: "Reviewing patient medicines", icon: "stethoscope" },
 ];
+
+const conditionsList = ["Diabetes", "Hypertension", "Thyroid", "Asthma", "Heart Disease"];
 
 export default function SignupPage() {
   const router = useRouter();
-  const [showPw, setShowPw] = useState(false);
+  const { loginLocal } = useAuth();
+  
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  
   const [role, setRole] = useState("patient");
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    age: "",
+    sex: "prefer_not_to_say",
+    conditions: [] as string[]
+  });
+  const [consentGiven, setConsentGiven] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const toggleCondition = (cond: string) => {
+    setForm(prev => ({
+      ...prev,
+      conditions: prev.conditions.includes(cond) 
+        ? prev.conditions.filter(c => c !== cond)
+        : [...prev.conditions, cond]
+    }));
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    
+    if (form.phone.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return;
+    }
+    
+    if (!consentGiven) {
+      setError("You must accept the DPDP consent notice to continue.");
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => router.push("/dashboard"), 1500);
+    
+    try {
+      // 1. Generate unique local ID
+      const localUid = "user_" + Math.random().toString(36).substr(2, 9) + Date.now();
+      const formattedPhone = form.phone.startsWith("+") ? form.phone : `+91${form.phone}`;
+
+      // 2. Save directly to Firestore completely bypassing Firebase Auth
+      // We run this asynchronously without 'await' so that if Firebase Firestore fails to connect on localhost,
+      // it doesn't freeze the user interface indefinitely. It will just queue in the background.
+      setDoc(doc(db, "users", localUid), {
+        role,
+        displayName: form.name,
+        phoneNumber: formattedPhone,
+        ageBand: form.age,
+        sex: form.sex,
+        conditions: form.conditions,
+        abhaLinkageStatus: "pending",
+        consentVersion: "v1.0",
+        createdAt: new Date().toISOString()
+      }).catch(err => console.error("Firestore Sync Deferred:", err));
+
+      // 3. Authenticate locally via Context & LocalStorage
+      loginLocal(localUid, formattedPhone);
+
+      // 4. Launch immediately
+      router.push("/dashboard");
+      
+    } catch (err: any) {
+      console.error("Signup failed:", err);
+      setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F8F8F4] dark:bg-[#0f1410]">
-
-      {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[42%] relative overflow-hidden p-12" style={{ background: "linear-gradient(145deg,#1e2f25 0%,#0f1a13 100%)" }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: "radial-gradient(circle,#5E7464,transparent)" }} />
-          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-15" style={{ background: "radial-gradient(circle,#3B82F6,transparent)" }} />
-        </div>
-
+    <div className="min-h-screen flex bg-[#FBF9F6] dark:bg-[#1A1F1B]">
+      
+      <div className="hidden lg:flex flex-col justify-between w-[42%] relative overflow-hidden p-12 bg-[#D0E9D5] dark:bg-[#2A3B30]">
         <Link href="/"><SafeMixLogo size={36} textSize="text-xl" /></Link>
-
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-[#9ab0a0] text-xs font-semibold mb-6">
-            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-            Free forever • No credit card
-          </div>
-          <h2 className="font-manrope font-bold text-4xl text-white mb-5 leading-tight">
-            Start Protecting<br />Your Health Today
+          <h2 className="font-manrope font-bold text-4xl text-[#0B1F14] dark:text-[#E1F9E5] mb-5 leading-tight">
+            SafeMix <br /> Dual-Medicine Intelligence
           </h2>
-          <p className="text-[#9ab0a0] text-lg mb-10">
-            It takes 30 seconds. No credit card. Full access immediately.
+          <p className="text-[#374B3D] dark:text-[#B5CCBA] text-lg mb-10">
+            India's first safety layer for Allopathic + AYUSH medications.
           </p>
-
           <div className="space-y-3">
-            {["Instant AI interaction detection","Family profiles & caregiver mode","Doctor QR sharing built in","Works in 10+ Indian languages"].map((f) => (
+            {["Red/Yellow/Green safety verdicts","Understand deep interactions in plain language","Works for 8 Indian medicine systems"].map((f) => (
               <div key={f} className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#5E7464]/40 flex items-center justify-center flex-shrink-0">
-                  <Check className="w-3.5 h-3.5 text-[#9ab0a0]" />
+                <div className="w-6 h-6 rounded-full bg-[#465B4C]/20 flex items-center justify-center flex-shrink-0">
+                  <Check className="w-3.5 h-3.5 text-[#465B4C] dark:text-[#E1F9E5]" />
                 </div>
-                <span className="text-[#c3d4c8] text-sm">{f}</span>
+                <span className="text-[#374B3D] dark:text-[#B5CCBA] text-sm">{f}</span>
               </div>
             ))}
           </div>
         </div>
-
-        <p className="text-xs text-[#607060]">Trusted by 500,000+ users across India</p>
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-10">
+      <div className="flex-1 flex items-center justify-center px-6 py-10 overflow-y-auto">
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8">
             <Link href="/"><SafeMixLogo size={30} textSize="text-lg" /></Link>
           </div>
 
           <div className="mb-7">
-            <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Create your account</h1>
-            <p className="text-[#52615a] dark:text-[#9ab0a0]">Free to start. Upgrade anytime.</p>
+            <h1 className="font-manrope font-bold text-3xl text-[#1B1C1A] dark:text-[#E3E2E0] mb-2">
+              Create Profile
+            </h1>
+            <p className="text-[#434843] dark:text-[#C3C8C1]">
+              Help the AI understand your baseline for accurate safety verdicts.
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Role picker */}
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-[#FFDAD6] border border-[#93000A]/20 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-[#BA1A1A] flex-shrink-0" />
+              <p className="text-sm text-[#93000A]">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSignup} className="space-y-5">
+            
+            <div className="grid grid-cols-2 gap-3">
+              {roles.map((r) => (
+                <button key={r.id} type="button" onClick={() => setRole(r.id)}
+                  className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
+                    role === r.id
+                      ? "border-[#465B4C] bg-[#D0E9D5]/30 text-[#0B1F14] dark:border-[#B5CCBA] dark:bg-[#465b4c]/20 dark:text-[#E1F9E5]"
+                      : "border-[#E3E2E0] bg-white text-[#434843] dark:border-[#434843] dark:bg-[#2A312B] dark:text-[#C3C8C1]"
+                  }`}
+                >
+                  <span className="material-symbols-outlined mb-1">{r.icon}</span>
+                  <span className="text-xs font-semibold">{r.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="block text-xs font-semibold text-[#434843] dark:text-[#C3C8C1] uppercase tracking-widest mb-1.5">Full Name</label>
+                <input required type="text" placeholder="e.g. Ramesh Kumar" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E3E2E0] dark:border-[#434843] bg-white dark:bg-[#1A1F1B] focus:border-[#465B4C] outline-none transition-colors" />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-semibold text-[#434843] dark:text-[#C3C8C1] uppercase tracking-widest mb-1.5">Age</label>
+                <input required type="number" placeholder="e.g. 58" value={form.age} onChange={e => setForm({...form, age: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E3E2E0] dark:border-[#434843] bg-white dark:bg-[#1A1F1B] focus:border-[#465B4C] outline-none transition-colors" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#434843] dark:text-[#C3C8C1] uppercase tracking-widest mb-1.5">Sex</label>
+                <select value={form.sex} onChange={e => setForm({...form, sex: e.target.value})}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E3E2E0] dark:border-[#434843] bg-white dark:bg-[#1A1F1B] focus:border-[#465B4C] outline-none transition-colors appearance-none">
+                  <option value="prefer_not_to_say">Select...</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
             <div>
-              <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">I am a...</label>
-              <div className="grid grid-cols-3 gap-2">
-                {roles.map((r) => (
-                  <button key={r.id} type="button" onClick={() => setRole(r.id)}
-                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all ${
-                      role === r.id
-                        ? "border-[#5E7464] bg-[#f0f8f2] dark:bg-[#1e2820] text-[#42594A] dark:text-[#b5ccba]"
-                        : "border-[#e0e8e2] dark:border-white/10 bg-white dark:bg-[#1a2218] text-[#52615a] dark:text-[#7a9080] hover:border-[#5E7464]/40"
-                    }`}
-                  >
-                    <span className={`material-symbols-outlined text-xl ${role === r.id ? "text-[#5E7464]" : "text-[#9ab0a0]"}`}>{r.icon}</span>
-                    <span className="text-xs font-semibold">{r.label}</span>
+              <label className="block text-xs font-semibold text-[#434843] dark:text-[#C3C8C1] uppercase tracking-widest mb-2">Known Conditions</label>
+              <div className="flex flex-wrap gap-2">
+                {conditionsList.map(cond => (
+                  <button key={cond} type="button" onClick={() => toggleCondition(cond)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                      form.conditions.includes(cond)
+                        ? "bg-[#465B4C] text-white border-[#465B4C]"
+                        : "bg-white text-[#434843] border-[#C3C8C1] dark:bg-[#2A312B] dark:text-[#C3C8C1] dark:border-[#737873]"
+                    }`}>
+                    {cond}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="pt-2">
+              <label className="block text-xs font-semibold text-[#434843] dark:text-[#C3C8C1] uppercase tracking-widest mb-1.5">Phone Number (For Login)</label>
+              <div className="flex gap-2">
+                <div className="px-4 py-3 rounded-xl border-2 border-[#E3E2E0] dark:border-[#434843] bg-[#F5F3F1] dark:bg-[#222823] text-[#434843] font-semibold">
+                  +91
+                </div>
+                <input required type="tel" placeholder="98765 43210" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
+                  className="flex-1 px-4 py-3 rounded-xl border-2 border-[#E3E2E0] dark:border-[#434843] bg-white dark:bg-[#1A1F1B] focus:border-[#465B4C] outline-none transition-colors" />
+              </div>
+            </div>
+
+            <div className="bg-[#D0E9D5]/30 dark:bg-[#222823] p-4 rounded-xl flex gap-3 items-start border border-[#B5CCBA]/30">
+              <ShieldCheck className="w-5 h-5 text-[#465B4C] dark:text-[#B5CCBA] flex-shrink-0 mt-0.5" />
               <div>
-                <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Full Name</label>
-                <input type="text" placeholder="Rahul Sharma" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Phone</label>
-                <input type="tel" placeholder="+91 98765 43210" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
-                />
+                <p className="text-xs text-[#374B3D] dark:text-[#C3C8C1] leading-relaxed mb-2">
+                  <strong className="text-[#0B1F14] dark:text-[#E1F9E5]">DPDP Act 2023 Consent:</strong> We collect your age, sex, and health info strictly to calculate accurate medicine safety interactions. Your data is encrypted and never sold.
+                </p>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={consentGiven} onChange={e => setConsentGiven(e.target.checked)} className="w-4 h-4 rounded text-[#465B4C] focus:ring-[#465B4C] bg-white" />
+                  <span className="text-xs font-semibold text-[#0B1F14] dark:text-[#E3E2E0]">I agree to the secure processing of my health data.</span>
+                </label>
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Email</label>
-              <input type="email" placeholder="rahul@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Password</label>
-              <div className="relative">
-                <input type={showPw ? "text" : "password"} placeholder="Create a strong password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
-                />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9ab0a0] hover:text-[#5E7464]">
-                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold py-3.5 rounded-xl transition-all hover:shadow-[0_8px_30px_rgba(94,116,100,0.35)] active:scale-[0.99] disabled:opacity-70 mt-2"
-              style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}
-            >
-              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><span>Create SafeMix Account</span><ArrowRight className="w-4 h-4" /></>}
+            <button type="submit" disabled={loading} className="w-full py-4 rounded-full font-semibold text-white bg-[#465B4C] hover:bg-[#4E6354] transition-all flex justify-center items-center gap-2 shadow-primary disabled:opacity-70">
+              {loading ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin"/> : <>Enter SafeMix <ArrowRight className="w-4 h-4"/></>}
             </button>
-          </form>
 
-          <p className="text-center text-xs text-[#9ab0a0] mt-5">
-            By signing up, you agree to our{" "}
-            <Link href="#" className="text-[#5E7464] hover:underline">Terms</Link> and{" "}
-            <Link href="#" className="text-[#5E7464] hover:underline">Privacy Policy</Link>
-          </p>
-          <p className="text-center text-sm text-[#52615a] dark:text-[#9ab0a0] mt-4">
-            Already have an account?{" "}
-            <Link href="/login" className="text-[#5E7464] font-semibold hover:underline">Sign in</Link>
-          </p>
+          </form>
         </div>
       </div>
     </div>

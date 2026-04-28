@@ -1,0 +1,46 @@
+/**
+ * Firebase Analytics helper.
+ * Wraps logEvent so we gracefully degrade if analytics fails to init.
+ */
+import { getApp } from "firebase/app";
+
+let _analytics: any = null;
+
+async function getAnalyticsInstance() {
+  if (_analytics) return _analytics;
+  try {
+    const { getAnalytics, isSupported } = await import("firebase/analytics");
+    const supported = await isSupported();
+    if (supported) {
+      _analytics = getAnalytics(getApp());
+    }
+  } catch {
+    // Analytics not supported in this environment (SSR, test, etc.)
+  }
+  return _analytics;
+}
+
+export async function trackEvent(
+  eventName: string,
+  params?: Record<string, string | number | boolean>
+) {
+  try {
+    const analytics = await getAnalyticsInstance();
+    if (!analytics) return;
+    const { logEvent } = await import("firebase/analytics");
+    logEvent(analytics, eventName, params);
+  } catch {
+    // Fail silently — analytics should never break the app
+  }
+}
+
+// Convenience named events
+export const AnalyticsEvents = {
+  PAGE_VIEW: "page_view",
+  INTERACTION_CHECK: "interaction_check",
+  MEDICINE_ADDED: "medicine_added",
+  QR_GENERATED: "qr_generated",
+  ADVERSE_EVENT_REPORTED: "adverse_event_reported",
+  SIGN_UP: "sign_up",
+  LOGIN: "login",
+} as const;
