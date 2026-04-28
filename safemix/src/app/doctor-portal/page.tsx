@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import SafeMixLogo from "@/components/ui/Logo";
 import { 
@@ -24,7 +24,7 @@ const patientData = {
   gender: "Male",
   id: "P-77291",
   lastCheck: "26 Apr 2026, 11:40 AM",
-  expiry: "45 minutes remaining"
+  // expiry is computed dynamically — 45 min window from page load
 };
 
 const medicines = [
@@ -53,12 +53,58 @@ const interactions = [
 
 export default function DoctorPortalPage() {
   const [acknowledged, setAcknowledged] = useState(false);
+  const [timeLeft, setTimeLeft] = useState("");
+  const [expired, setExpired] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // 45-minute demo access window starting from page load
+  useEffect(() => {
+    const expiryTs = Date.now() + 45 * 60 * 1000;
+
+    const formatMs = (ms: number) => {
+      const m = Math.floor(ms / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    };
+
+    setTimeLeft(formatMs(expiryTs - Date.now()));
+
+    timerRef.current = setInterval(() => {
+      const remaining = expiryTs - Date.now();
+      if (remaining <= 0) {
+        clearInterval(timerRef.current!);
+        setExpired(true);
+        setTimeLeft("00:00");
+        return;
+      }
+      setTimeLeft(formatMs(remaining));
+    }, 1000);
+
+    return () => clearInterval(timerRef.current!);
+  }, []);
+
+  const handlePrint = () => window.print();
+
+  const handleDownloadPDF = () => {
+    const prev = document.title;
+    document.title = `SafeMix_Doctor_Report_${patientData.id}.pdf`;
+    window.print();
+    document.title = prev;
+  };
 
   return (
     <div className="min-h-screen bg-[#F4F7F5] dark:bg-[#0f1410] flex flex-col font-sans">
       {/* Clinical Header */}
       <header className="bg-white dark:bg-[#141a15] border-b border-[#e0e8e2] dark:border-white/10 h-16 flex items-center justify-between px-6 sticky top-0 z-50">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/doctor-share"
+            className="print:hidden flex items-center gap-1.5 text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] hover:text-[#5E7464] dark:hover:text-[#b5ccba] transition-colors group">
+            <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="hidden sm:inline">Patient Portal</span>
+          </Link>
+          <div className="h-6 w-px bg-[#e0e8e2] dark:bg-white/10 print:hidden" />
           <Link href="/">
             <SafeMixLogo size={28} textSize="text-base" />
           </Link>
@@ -69,15 +115,22 @@ export default function DoctorPortalPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
           <div className="hidden lg:flex flex-col items-end text-right">
             <span className="text-xs font-bold text-[#1a2820] dark:text-white">Access expires in</span>
-            <span className="text-[10px] text-emerald-600 font-bold">{patientData.expiry}</span>
+            <span className={`text-[10px] font-bold font-mono ${expired ? "text-red-500" : "text-emerald-600"}`}>
+              {expired ? "Expired" : timeLeft}
+            </span>
           </div>
-          <button className="p-2 rounded-xl bg-[#F8F8F4] dark:bg-[#1e2820] border border-[#e0e8e2] dark:border-white/10 text-[#52615a] hover:bg-white transition-all">
+          <button
+            onClick={handlePrint}
+            title="Print this report"
+            className="print:hidden p-2 rounded-xl bg-[#F8F8F4] dark:bg-[#1e2820] border border-[#e0e8e2] dark:border-white/10 text-[#52615a] hover:bg-white hover:border-[#5E7464]/40 hover:text-[#5E7464] transition-all">
             <Printer className="w-4 h-4" />
           </button>
-          <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#42594A] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all">
+          <button
+            onClick={handleDownloadPDF}
+            className="print:hidden hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#42594A] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all">
             <Download className="w-4 h-4" />
             Download PDF
           </button>

@@ -8,9 +8,9 @@ import {
   PlusCircle,
   FileText,
   Bell,
-  Users,
   Share2,
   Settings,
+  AlertOctagon,
   ChevronLeft,
   ChevronRight,
   X,
@@ -18,13 +18,13 @@ import {
 import { useState, useEffect } from "react";
 
 const links = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Add Medicine", href: "/dashboard/add-medicine", icon: PlusCircle },
-  { label: "Reports", href: "/dashboard/reports", icon: FileText },
-  { label: "Reminders", href: "/dashboard/reminders", icon: Bell },
-  { label: "Family", href: "/dashboard/family", icon: Users },
-  { label: "Doctor Share", href: "/dashboard/doctor-share", icon: Share2 },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Overview",       href: "/dashboard",                  icon: LayoutDashboard, exact: true },
+  { label: "Add Medicine",   href: "/dashboard/add-medicine",     icon: PlusCircle,      exact: false },
+  { label: "Reminders",      href: "/dashboard/reminders",        icon: Bell,            exact: false },
+  { label: "Reports",        href: "/dashboard/reports",          icon: FileText,        exact: false },
+  { label: "Doctor Share",   href: "/dashboard/doctor-share",     icon: Share2,          exact: false },
+  { label: "Report Adverse", href: "/dashboard/adverse-event",    icon: AlertOctagon,    exact: false },
+  { label: "Settings",       href: "/dashboard/settings",         icon: Settings,        exact: false },
 ];
 
 interface SidebarProps {
@@ -83,8 +83,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
 
         {/* Navigation Links */}
         <nav className="flex-1 py-4 px-2 space-y-0.5 overflow-y-auto">
-          {links.map(({ label, href, icon: Icon }) => {
-            const active = pathname === href;
+          {links.map(({ label, href, icon: Icon, exact }) => {
+            const active = exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={href}

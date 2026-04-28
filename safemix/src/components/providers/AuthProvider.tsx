@@ -1,55 +1,61 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-// Removed firebase/auth dependencies to bypass console blockers completely
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
+import { useRouter, usePathname } from "next/navigation";
+
+// ─── Public routes that don't require auth ────────────────────────────────────
+const PUBLIC_PATHS = ["/", "/login", "/signup", "/onboarding", "/features", "/pricing", "/faq", "/contact", "/security", "/doctors"];
 
 interface AuthContextType {
-  user: any | null;
+  user: User | null;
   loading: boolean;
-  loginLocal: (uid: string, phone: string) => void;
-  logoutLocal: () => void;
+  logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({ 
-  user: null, 
+const AuthContext = createContext<AuthContextType>({
+  user: null,
   loading: true,
-  loginLocal: () => {},
-  logoutLocal: () => {}
+  logout: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    // Hackathon Bypass: Read user directly from local storage
-    const storedUid = localStorage.getItem("safemix_uid");
-    const storedPhone = localStorage.getItem("safemix_phone");
-    
-    if (storedUid) {
-      setUser({ uid: storedUid, phoneNumber: storedPhone || "Unknown" });
-    } else {
-      setUser(null);
-    }
-    
-    setLoading(false);
-  }, []);
+    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoading(false);
 
-  // Expose a helper to easily login/logout locally without Firebase API
-  const loginLocal = (uid: string, phone: string) => {
-    localStorage.setItem("safemix_uid", uid);
-    localStorage.setItem("safemix_phone", phone);
-    setUser({ uid, phoneNumber: phone });
-  };
+      const isPublic = PUBLIC_PATHS.some(
+        (p) => pathname === p || pathname.startsWith(p + "/")
+      );
 
-  const logoutLocal = () => {
-    localStorage.removeItem("safemix_uid");
-    localStorage.removeItem("safemix_phone");
-    setUser(null);
+      if (!firebaseUser && !isPublic) {
+        // Not logged in and on a protected page → redirect to login
+        router.replace("/login");
+      }
+
+      if (firebaseUser && (pathname === "/login" || pathname === "/signup")) {
+        // Already logged in → skip auth pages
+        router.replace("/dashboard");
+      }
+    });
+
+    return () => unsub();
+  }, [pathname, router]);
+
+  const logout = async () => {
+    await signOut(auth);
+    router.replace("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginLocal, logoutLocal } as any}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

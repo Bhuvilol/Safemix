@@ -1,9 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
-import { AlertTriangle, CheckCircle, AlertCircle, Clock, Shield, Pill, ArrowLeft, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle, AlertCircle, Clock, Shield, Pill, XCircle, Printer, Download } from "lucide-react";
 import Link from "next/link";
-import { QRCodeSVG } from "qrcode.react";
 
 // Medicine data that would come from Firestore in production
 const DEMO_REGIMEN = [
@@ -44,10 +43,12 @@ function decodeToken(token: string): TokenPayload | null {
 export default function DoctorPortalScanPage() {
   const params = useParams();
   const token = params?.token as string | undefined;
+  const printRef = useRef<HTMLDivElement>(null);
 
-  const [status, setStatus] = useState<"loading" | "valid" | "expired" | "invalid">("loading");
+  const [status, setStatus] = useState<"loading" | "valid" | "expired" | "revoked" | "invalid">("loading");
   const [payload, setPayload] = useState<TokenPayload | null>(null);
   const [timeLeft, setTimeLeft] = useState("");
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (!token) { setStatus("invalid"); return; }
@@ -55,26 +56,97 @@ export default function DoctorPortalScanPage() {
     const decoded = decodeToken(token);
     if (!decoded) { setStatus("invalid"); return; }
 
+    // Helper: check if this token is in the revoked list
+    const isRevoked = () => {
+      const revoked: string[] = JSON.parse(localStorage.getItem("safemix_revoked_tokens") || "[]");
+      return revoked.includes(token);
+    };
+
+    // 1. Check revocation registry immediately on load
+    if (isRevoked()) { setStatus("revoked"); return; }
+
+    // 2. Check expiry
     setPayload(decoded);
     if (Date.now() > decoded.expiry) {
       setStatus("expired");
-    } else {
-      setStatus("valid");
+      return;
     }
+
+    setStatus("valid");
+
+    // 3. Listen for cross-tab revocation in real time
+    //    The "storage" event fires instantly in OTHER tabs when localStorage changes
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "safemix_revoked_tokens" && isRevoked()) {
+        setStatus("revoked");
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, [token]);
 
-  // Live countdown
+  // Live countdown — runs on mount and ticks every second
   useEffect(() => {
     if (status !== "valid" || !payload) return;
+
+    const formatRemaining = (ms: number) => {
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`;
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    };
+
+    // Set immediately so there's no empty flash
+    const initial = payload.expiry - Date.now();
+    if (initial <= 0) { setStatus("expired"); return; }
+    setTimeLeft(formatRemaining(initial));
+
     const interval = setInterval(() => {
       const remaining = payload.expiry - Date.now();
-      if (remaining <= 0) { setStatus("expired"); clearInterval(interval); return; }
-      const mins = Math.floor(remaining / 60000);
-      const secs = Math.floor((remaining % 60000) / 1000);
-      setTimeLeft(`${mins}m ${secs}s`);
+      if (remaining <= 0) {
+        setStatus("expired");
+        clearInterval(interval);
+        return;
+      }
+      setTimeLeft(formatRemaining(remaining));
     }, 1000);
+
     return () => clearInterval(interval);
   }, [status, payload]);
+
+  // ── Print ────────────────────────────────────────────────────────────────────
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // ── Download PDF (uses browser print-to-PDF) ─────────────────────────────────
+  const handleDownloadPDF = async () => {
+    setDownloading(true);
+    try {
+      // Use a hidden iframe to trigger print-to-PDF with a pre-set filename hint
+      const style = document.createElement("style");
+      style.id = "safemix-print-style";
+      style.textContent = `
+        @media print {
+          @page { size: A4; margin: 20mm; }
+          body > *:not(#safemix-print-root) { display: none !important; }
+          #safemix-print-root { display: block !important; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Set document title so the PDF filename is meaningful
+      const prev = document.title;
+      document.title = `SafeMix_Patient_Report_${payload?.uid?.slice(0, 8) || "report"}.pdf`;
+      window.print();
+      document.title = prev;
+      document.head.removeChild(style);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const verdictConfig = {
     red: { bg: "#FFF1F0", border: "#FFCCC7", text: "#C41C00", iconBg: "#FFCCC7", icon: AlertTriangle },
@@ -86,6 +158,25 @@ export default function DoctorPortalScanPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAF8]">
         <div className="w-10 h-10 rounded-full border-4 border-[#5E7464] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (status === "revoked") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAF8] dark:bg-[#0f1410] p-4">
+        <div className="max-w-sm w-full bg-white dark:bg-[#1e2820] rounded-3xl border border-[#e0e8e2] dark:border-white/10 p-8 text-center space-y-5 shadow-2xl">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+            <XCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="font-manrope font-bold text-xl text-[#1a2820] dark:text-white">Access Revoked</h2>
+          <p className="text-sm text-[#7a9080]">
+            The patient has revoked access to this report. Ask them to generate a new QR code if you still need to review their medications.
+          </p>
+          <Link href="/" className="block w-full py-3 text-sm font-semibold rounded-xl bg-[#42594A] text-white text-center">
+            Go to SafeMix
+          </Link>
+        </div>
       </div>
     );
   }
@@ -129,22 +220,45 @@ export default function DoctorPortalScanPage() {
       <div className="max-w-4xl mx-auto space-y-6">
 
         {/* Header */}
-        <div className="bg-white dark:bg-[#1e2820] rounded-3xl border border-[#e0e8e2] dark:border-white/10 p-6 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#1e2820] rounded-3xl border border-[#e0e8e2] dark:border-white/10 p-5 md:p-6 flex items-center justify-between gap-4 print:rounded-none print:border-0 print:shadow-none">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
               <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#5E7464]">SafeMix Doctor Portal</p>
-              <h1 className="font-manrope font-bold text-xl text-[#1a2820] dark:text-white">Patient Medication Review</h1>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#5E7464]">SafeMix · Doctor Portal · Clinical Review Mode</p>
+              <h1 className="font-manrope font-bold text-lg text-[#1a2820] dark:text-white">Patient Medication Review</h1>
             </div>
           </div>
-          <div className="text-right">
-            <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Secure · Temporary Access
-            </div>
-            {timeLeft && <p className="text-[11px] text-[#9ab0a0] mt-1">Expires in {timeLeft}</p>}
+          <div className="flex items-center gap-3">
+            {timeLeft && (
+              <div className="text-right hidden sm:block">
+                <p className="text-[10px] text-[#9ab0a0]">Access expires in</p>
+                <p className="text-xs font-bold text-emerald-600">{timeLeft} remaining</p>
+              </div>
+            )}
+            {/* Print button */}
+            <button
+              onClick={handlePrint}
+              title="Print this report"
+              className="print:hidden w-9 h-9 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] flex items-center justify-center text-[#52615a] dark:text-[#9ab0a0] hover:border-[#5E7464]/40 hover:text-[#5E7464] transition-all"
+            >
+              <Printer className="w-4 h-4" />
+            </button>
+            {/* Download PDF button */}
+            <button
+              onClick={handleDownloadPDF}
+              disabled={downloading}
+              className="print:hidden flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all hover:shadow-lg disabled:opacity-60"
+              style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}
+            >
+              {downloading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              Download PDF
+            </button>
           </div>
         </div>
 

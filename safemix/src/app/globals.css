@@ -182,3 +182,54 @@
     border-color: rgba(115, 120, 115, 0.3) !important;
   }
 }
+
+/* ── Print styles (Doctor Portal PDF) ──────────────────────────────────── */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm 20mm;
+  }
+
+  /* Force light mode on print */
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide all navigation chrome */
+  header,
+  nav,
+  aside,
+  footer,
+  [class*="BottomNav"],
+  [class*="Topbar"],
+  [class*="Sidebar"] {
+    display: none !important;
+  }
+
+  /* Remove scroll containers */
+  body, main, .overflow-y-auto, .overflow-hidden {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Remove rounded corners and shadows for clean print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Ensure backgrounds print */
+  .bg-white, [class*="dark:bg-"] {
+    background: #fff !important;
+  }
+
+  /* Keep colour badges visible */
+  [style*="background"] {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+

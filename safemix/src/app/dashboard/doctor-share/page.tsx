@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { QrCode, Clock, Shield, Share2, ArrowRight, History, Copy, CheckCheck } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -17,12 +17,43 @@ export default function DoctorSharePage() {
   const [qrGenerated, setQrGenerated] = useState(false);
   const [qrUrl, setQrUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [timeLeft, setTimeLeft] = useState("");
+  const [expiryTimestamp, setExpiryTimestamp] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const expiryMs: Record<string, number> = {
-    "15 min": 15 * 60 * 1000,
-    "1 hour": 60 * 60 * 1000,
+    "15 min":  15 * 60 * 1000,
+    "1 hour":  60 * 60 * 1000,
     "24 hour": 24 * 60 * 60 * 1000,
   };
+
+  // Live countdown ticker
+  useEffect(() => {
+    if (!expiryTimestamp) return;
+
+    // Tick immediately
+    const tick = () => {
+      const remaining = expiryTimestamp - Date.now();
+      if (remaining <= 0) {
+        clearInterval(timerRef.current!);
+        setTimeLeft("Expired");
+        setQrGenerated(false); // auto-revoke the QR card
+        return;
+      }
+      const h = Math.floor(remaining / 3600000);
+      const m = Math.floor((remaining % 3600000) / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      if (h > 0) {
+        setTimeLeft(`${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`);
+      } else {
+        setTimeLeft(`${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
+      }
+    };
+
+    tick();
+    timerRef.current = setInterval(tick, 1000);
+    return () => clearInterval(timerRef.current!);
+  }, [expiryTimestamp]);
 
   const handleGenerate = () => {
     setGenerating(true);
@@ -38,10 +69,32 @@ export default function DoctorSharePage() {
       localStorage.setItem("safemix_shares", JSON.stringify(shares.slice(0, 10)));
       const url = `${window.location.origin}/doctor-portal/scan/${token}`;
       setQrUrl(url);
+      setExpiryTimestamp(expiryTime); // start the live countdown
       setGenerating(false);
       setQrGenerated(true);
       await trackEvent(AnalyticsEvents.QR_GENERATED, { expiry });
     }, 1200);
+  };
+
+  const handleRevoke = () => {
+    clearInterval(timerRef.current!);
+
+    // Write token to revoked registry so the scan page blocks access immediately
+    if (qrUrl) {
+      const token = qrUrl.split("/doctor-portal/scan/")[1];
+      if (token) {
+        const revoked: string[] = JSON.parse(localStorage.getItem("safemix_revoked_tokens") || "[]");
+        if (!revoked.includes(token)) {
+          revoked.unshift(token);
+          localStorage.setItem("safemix_revoked_tokens", JSON.stringify(revoked.slice(0, 50)));
+        }
+      }
+    }
+
+    setQrGenerated(false);
+    setTimeLeft("");
+    setExpiryTimestamp(null);
+    setQrUrl("");
   };
 
   const copyLink = () => {
@@ -127,7 +180,11 @@ export default function DoctorSharePage() {
                 <p className="font-semibold text-[#1a2820] dark:text-white">QR Code Active</p>
                 <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
                   <Clock className="w-3.5 h-3.5" />
-                  Expires in {expiry}
+                  {timeLeft ? (
+                    <span className="font-mono tracking-tight">Expires in <strong>{timeLeft}</strong></span>
+                  ) : (
+                    <span>Starting timer…</span>
+                  )}
                 </div>
               </div>
 
@@ -136,7 +193,7 @@ export default function DoctorSharePage() {
                   className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#e0e8e2] dark:border-white/10 text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] hover:bg-[#f0f5f1] dark:hover:bg-[#2a3430] transition-all">
                   {copied ? <><CheckCheck className="w-3.5 h-3.5 text-emerald-500" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy Link</>}
                 </button>
-                <button onClick={() => setQrGenerated(false)} className="flex-1 py-3 rounded-2xl bg-[#f0f5f1] dark:bg-[#2a3430] text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] hover:bg-[#e0e8e2] dark:hover:bg-[#344038] transition-all">
+                <button onClick={handleRevoke} className="flex-1 py-3 rounded-2xl bg-[#f0f5f1] dark:bg-[#2a3430] text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] hover:bg-[#e0e8e2] dark:hover:bg-[#344038] transition-all">
                   Revoke Now
                 </button>
               </div>

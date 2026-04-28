@@ -10,18 +10,15 @@ interface TopbarProps {
 }
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
-  const { user, logoutLocal } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [showProfile, setShowProfile] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [dark, setDark] = useState(false);
 
-  // Derive display name / initial from stored phone or uid
-  const displayPhone = user?.phoneNumber || "";
-  const initial = displayPhone.replace(/\D/g, "").charAt(0) || "U";
-  const displayName = displayPhone.startsWith("+91") || displayPhone.includes("@")
-    ? displayPhone
-    : displayPhone || "User";
+  // Derive display name from real Firebase user
+  const displayName = user?.displayName || user?.phoneNumber || user?.email || "User";
+  const initial = (user?.displayName?.[0] || user?.phoneNumber?.replace(/\D/g, "").charAt(0) || user?.email?.[0] || "U").toUpperCase();
 
   useEffect(() => {
     setDark(document.documentElement.classList.contains("dark"));
@@ -123,7 +120,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
               ))}
               <div className="border-t border-[#e0e8e2] dark:border-white/10 mt-1 pt-1">
                 <button
-                  onClick={() => { logoutLocal(); setShowProfile(false); router.push("/"); }}
+                  onClick={async () => { await logout(); setShowProfile(false); }}
                   className="w-full text-left block px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors"
                 >
                   Sign Out

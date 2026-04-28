@@ -1,15 +1,14 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, PlusCircle, FileText, Bell, User } from "lucide-react";
+import { Home, PlusCircle, FileText, Bell, Settings } from "lucide-react";
 
 const navItems = [
-  { name: "Home", href: "/dashboard", icon: Home },
-  { name: "Add", href: "/dashboard/add-medicine", icon: PlusCircle },
-  { name: "Reports", href: "/dashboard/reports", icon: FileText },
-  { name: "Reminders", href: "/dashboard/reminders", icon: Bell },
-  { name: "Profile", href: "/dashboard/settings", icon: User },
+  { name: "Home",      href: "/dashboard",               icon: Home },
+  { name: "Add",       href: "/dashboard/add-medicine",  icon: PlusCircle },
+  { name: "Reminders", href: "/dashboard/reminders",      icon: Bell },
+  { name: "Reports",   href: "/dashboard/reports",        icon: FileText },
+  { name: "Settings",  href: "/dashboard/settings",       icon: Settings },
 ];
 
 export default function BottomNav() {
@@ -18,8 +17,9 @@ export default function BottomNav() {
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-[#1A1F1B] border-t border-[#E3E2E0] dark:border-[#434843] flex items-center justify-around px-2 z-50 pb-safe shadow-[0_-4px_24px_rgba(70,91,76,0.06)]">
       {navItems.map((item) => {
-        const isActive = pathname === item.href;
-        
+        // Mark active for the item and any sub-routes (e.g. /dashboard/add-medicine/xxx)
+        const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+
         return (
           <Link
             key={item.name}
@@ -28,8 +28,8 @@ export default function BottomNav() {
           >
             <div
               className={`relative flex items-center justify-center w-10 h-8 rounded-full transition-colors duration-200 ${
-                isActive 
-                  ? "bg-[#D0E9D5] dark:bg-[#465b4c]/40 text-[#0B1F14] dark:text-[#E1F9E5]" 
+                isActive
+                  ? "bg-[#D0E9D5] dark:bg-[#465b4c]/40 text-[#0B1F14] dark:text-[#E1F9E5]"
                   : "text-[#737873] dark:text-[#C3C8C1]"
               }`}
             >
@@ -37,8 +37,8 @@ export default function BottomNav() {
             </div>
             <span
               className={`text-[10px] font-semibold transition-colors duration-200 ${
-                isActive 
-                  ? "text-[#0B1F14] dark:text-[#E3E2E0]" 
+                isActive
+                  ? "text-[#0B1F14] dark:text-[#E3E2E0]"
                   : "text-[#737873] dark:text-[#C3C8C1]"
               }`}
             >

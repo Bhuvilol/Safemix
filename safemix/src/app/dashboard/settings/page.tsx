@@ -32,7 +32,7 @@ const sections = [
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const [active, setActive] = useState("account");
-  const { logoutLocal } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
 
   // Family state — stored in localStorage
@@ -81,7 +81,7 @@ export default function SettingsPage() {
         ))}
         <div className="pt-4 mt-4 border-t border-[#e0e8e2] dark:border-white/10">
           <button
-            onClick={() => { logoutLocal(); router.push("/"); }}
+            onClick={async () => { await logout(); }}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
           >
             <LogOut className="w-4 h-4" />

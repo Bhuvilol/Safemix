@@ -1,10 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SafeMixLogo from "@/components/ui/Logo";
-import { Eye, EyeOff, ArrowRight } from "lucide-react";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { ArrowRight, Phone, ShieldCheck, AlertCircle, ChevronLeft } from "lucide-react";
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  type ConfirmationResult,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
+
+declare global {
+  interface Window { recaptchaVerifier?: RecaptchaVerifier; }
+}
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-4 h-4">
@@ -15,48 +26,110 @@ const GoogleIcon = () => (
   </svg>
 );
 
+type Step = "choose" | "phone" | "otp";
+
 export default function LoginPage() {
   const router = useRouter();
-  const { loginLocal } = useAuth();
-  const [showPw, setShowPw] = useState(false);
+  const [step, setStep] = useState<Step>("choose");
+  const [phone, setPhone]   = useState("");
+  const [otp, setOtp]       = useState("");
+  const [error, setError]   = useState("");
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ credential: "", password: "" });
+  const [confirm, setConfirm] = useState<ConfirmationResult | null>(null);
+  const recaptchaRef = useRef<HTMLDivElement>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Set up invisible reCAPTCHA once
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+        size: "invisible",
+      });
+    }
+  }, []);
+
+  // ── Google Sign-In ──────────────────────────────────────────────────────────
+  const handleGoogle = async () => {
+    setError("");
     setLoading(true);
-    // Bypass: create a local session using the credential as phone/email
-    const uid = "user_login_" + Math.random().toString(36).substr(2, 9);
-    loginLocal(uid, form.credential || "+91-login-user");
-    setTimeout(() => router.push("/dashboard"), 800);
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      router.replace("/dashboard");
+    } catch (e: any) {
+      setError(e.message || "Google sign-in failed.");
+      setLoading(false);
+    }
+  };
+
+  // ── Phone: Send OTP ─────────────────────────────────────────────────────────
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 10) {
+      setError("Enter a valid 10-digit mobile number.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const formattedPhone = digits.length === 10 ? `+91${digits}` : `+${digits}`;
+      const verifier = window.recaptchaVerifier!;
+      const result = await signInWithPhoneNumber(auth, formattedPhone, verifier);
+      setConfirm(result);
+      setStep("otp");
+    } catch (e: any) {
+      setError(e.message || "Failed to send OTP. Check the number and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Phone: Verify OTP ───────────────────────────────────────────────────────
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!confirm) return;
+    setLoading(true);
+    try {
+      await confirm.confirm(otp);
+      router.replace("/dashboard");
+    } catch {
+      setError("Invalid OTP. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex bg-[#F8F8F4] dark:bg-[#0f1410]">
 
-      {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[45%] relative overflow-hidden p-12" style={{ background: "linear-gradient(145deg,#2d4035 0%,#1a2820 100%)" }}>
+      {/* Hidden reCAPTCHA anchor */}
+      <div id="recaptcha-container" ref={recaptchaRef} />
+
+      {/* ── Left Panel ── */}
+      <div className="hidden lg:flex flex-col justify-between w-[45%] relative overflow-hidden p-12"
+        style={{ background: "linear-gradient(145deg,#2d4035 0%,#1a2820 100%)" }}>
         <div className="absolute inset-0 pointer-events-none opacity-20">
-          <div className="absolute top-20 right-20 w-80 h-80 rounded-full blur-3xl" style={{ background: "radial-gradient(circle,#5E7464,transparent)" }} />
-          <div className="absolute bottom-20 left-20 w-60 h-60 rounded-full blur-3xl" style={{ background: "radial-gradient(circle,#3B82F6,transparent)" }} />
+          <div className="absolute top-20 right-20 w-80 h-80 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle,#5E7464,transparent)" }} />
+          <div className="absolute bottom-20 left-20 w-60 h-60 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle,#3B82F6,transparent)" }} />
         </div>
 
-        <Link href="/">
-          <SafeMixLogo size={36} textSize="text-xl" />
-        </Link>
+        <Link href="/"><SafeMixLogo size={36} textSize="text-xl" /></Link>
 
         <div className="relative z-10">
           <h2 className="font-manrope font-bold text-4xl text-white mb-5 leading-tight">
             Safer Medicine,<br />Smarter Decisions
           </h2>
           <p className="text-[#9ab0a0] text-lg mb-10 leading-relaxed">
-            Join 500,000+ Indians who check their medicines before they take them.
+            India&apos;s first AI safety layer for Allopathic + AYUSH medicines.
           </p>
           <div className="space-y-4">
             {[
-              { icon: "fact_check", text: "Red / Yellow / Green safety verdicts" },
-              { icon: "qr_code_2", text: "Share regimen with doctors via QR" },
-              { icon: "family_restroom", text: "Manage medicines for your whole family" },
+              { icon: "fact_check",       text: "Red / Yellow / Green safety verdicts" },
+              { icon: "qr_code_2",        text: "Share your regimen with doctors via QR" },
+              { icon: "family_restroom",  text: "Manage medicines for your entire family" },
             ].map((f) => (
               <div key={f.text} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
@@ -68,100 +141,178 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {[1,2,3].map((i) => (
-            <div key={i} className={`rounded-full bg-white/20 ${i === 1 ? "w-8 h-2" : "w-2 h-2"}`} />
-          ))}
+        <div className="flex items-center gap-2 text-xs text-[#7a9080]">
+          <ShieldCheck className="w-4 h-4" />
+          <span>DPDP Act 2023 compliant · Data never sold</span>
         </div>
       </div>
 
-      {/* Right panel */}
+      {/* ── Right Panel ── */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
+
+          {/* Mobile logo */}
           <div className="lg:hidden mb-8">
             <Link href="/"><SafeMixLogo size={32} textSize="text-lg" /></Link>
           </div>
 
-          <div className="mb-8">
-            <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Welcome back</h1>
-            <p className="text-[#52615a] dark:text-[#9ab0a0]">Sign in to your SafeMix account</p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">Email or Phone</label>
-              <input
-                type="text"
-                placeholder="rahul@example.com or +91 98765 43210"
-                value={form.credential}
-                onChange={(e) => setForm({ ...form, credential: e.target.value })}
-                className="w-full px-4 py-3.5 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest">Password</label>
-                <Link href="#" className="text-xs text-[#5E7464] hover:underline font-medium">Forgot password?</Link>
+          {/* ── STEP: Choose method ── */}
+          {step === "choose" && (
+            <>
+              <div className="mb-8">
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Welcome back</h1>
+                <p className="text-[#52615a] dark:text-[#9ab0a0]">Sign in to your SafeMix account</p>
               </div>
-              <div className="relative">
-                <input
-                  type={showPw ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full px-4 py-3.5 pr-12 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-sm"
-                />
-                <button type="button" onClick={() => setShowPw(!showPw)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9ab0a0] hover:text-[#5E7464]">
-                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+
+              {error && (
+                <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {/* Google */}
+                <button onClick={handleGoogle} disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white font-semibold text-sm hover:border-[#5E7464]/50 hover:bg-[#f4f8f5] dark:hover:bg-[#2a3430] transition-all disabled:opacity-60">
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-[#5E7464]/30 border-t-[#5E7464] rounded-full animate-spin" />
+                  ) : (
+                    <><GoogleIcon /> Continue with Google</>
+                  )}
+                </button>
+
+                {/* Phone OTP */}
+                <button onClick={() => { setError(""); setStep("phone"); }} disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white font-semibold text-sm hover:border-[#5E7464]/50 hover:bg-[#f4f8f5] dark:hover:bg-[#2a3430] transition-all disabled:opacity-60">
+                  <Phone className="w-4 h-4 text-[#5E7464]" />
+                  Continue with Phone OTP
                 </button>
               </div>
-            </div>
 
-            <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold py-3.5 rounded-xl transition-all hover:shadow-[0_8px_30px_rgba(94,116,100,0.35)] active:scale-[0.99] disabled:opacity-70"
-              style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <><span>Sign In</span><ArrowRight className="w-4 h-4" /></>
+              <div className="mt-6 p-4 rounded-xl bg-[#f0f8f2] dark:bg-[#1a2a1e] border border-[#b7eb8f]/30 flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#5E7464] flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-[#52615a] dark:text-[#9ab0a0]">
+                  Your sign-in is secured by Firebase Authentication. We never store passwords.
+                </p>
+              </div>
+
+              <p className="text-center text-sm text-[#52615a] dark:text-[#9ab0a0] mt-8">
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="text-[#5E7464] font-semibold hover:underline">Create account</Link>
+              </p>
+            </>
+          )}
+
+          {/* ── STEP: Enter phone ── */}
+          {step === "phone" && (
+            <>
+              <button onClick={() => { setStep("choose"); setError(""); }}
+                className="flex items-center gap-1 text-sm text-[#7a9080] hover:text-[#5E7464] mb-6 transition-colors">
+                <ChevronLeft className="w-4 h-4" /> Back
+              </button>
+
+              <div className="mb-8">
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Enter your number</h1>
+                <p className="text-[#52615a] dark:text-[#9ab0a0]">We&apos;ll send a 6-digit OTP to verify your identity.</p>
+              </div>
+
+              {error && (
+                <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
               )}
-            </button>
-          </form>
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#e0e8e2] dark:bg-white/10" />
-            <span className="text-xs text-[#9ab0a0] font-medium">or continue with</span>
-            <div className="flex-1 h-px bg-[#e0e8e2] dark:bg-white/10" />
-          </div>
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">
+                    Mobile Number
+                  </label>
+                  <div className="flex rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 overflow-hidden focus-within:border-[#5E7464] focus-within:ring-2 focus-within:ring-[#5E7464]/20 transition-all">
+                    <span className="px-4 py-3.5 bg-[#f0f8f2] dark:bg-[#1a2a1e] text-[#5E7464] font-bold text-sm border-r border-[#e0e8e2] dark:border-white/15 flex-shrink-0">
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      placeholder="98765 43210"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                      className="flex-1 px-4 py-3.5 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => { 
-                setLoading(true); 
-                const uid = "user_google_" + Math.random().toString(36).substr(2, 9);
-                loginLocal(uid, "google-user@gmail.com");
-                setTimeout(() => router.push("/dashboard"), 800); 
-              }}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-sm font-medium text-[#1a2820] dark:text-white hover:border-[#5E7464]/40 hover:bg-[#f4f8f5] dark:hover:bg-[#2a3430] transition-all"
-            >
-              <GoogleIcon />
-              Google
-            </button>
-            <button
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-sm font-medium text-[#1a2820] dark:text-white hover:border-[#5E7464]/40 hover:bg-[#f4f8f5] dark:hover:bg-[#2a3430] transition-all"
-            >
-              <span className="material-symbols-outlined text-base text-[#5E7464]">smartphone</span>
-              OTP
-            </button>
-          </div>
+                <button type="submit" disabled={loading || phone.length < 10}
+                  className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold py-3.5 rounded-xl transition-all hover:shadow-[0_8px_30px_rgba(94,116,100,0.35)] active:scale-[0.99] disabled:opacity-60"
+                  style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <><span>Send OTP</span><ArrowRight className="w-4 h-4" /></>
+                  )}
+                </button>
+              </form>
+            </>
+          )}
 
-          <p className="text-center text-sm text-[#52615a] dark:text-[#9ab0a0] mt-8">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-[#5E7464] font-semibold hover:underline">Create account</Link>
-          </p>
+          {/* ── STEP: Enter OTP ── */}
+          {step === "otp" && (
+            <>
+              <button onClick={() => { setStep("phone"); setError(""); setOtp(""); }}
+                className="flex items-center gap-1 text-sm text-[#7a9080] hover:text-[#5E7464] mb-6 transition-colors">
+                <ChevronLeft className="w-4 h-4" /> Change number
+              </button>
+
+              <div className="mb-8">
+                <h1 className="font-manrope font-bold text-3xl text-[#1a2820] dark:text-white mb-2">Enter OTP</h1>
+                <p className="text-[#52615a] dark:text-[#9ab0a0]">
+                  6-digit code sent to <span className="font-semibold text-[#1a2820] dark:text-white">+91 {phone}</span>
+                </p>
+              </div>
+
+              {error && (
+                <div className="mb-5 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#52615a] dark:text-[#9ab0a0] uppercase tracking-widest mb-2">
+                    6-Digit OTP
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="• • • • • •"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    className="w-full px-4 py-3.5 rounded-xl border-2 border-[#e0e8e2] dark:border-white/15 bg-white dark:bg-[#1e2820] text-[#1a2820] dark:text-white placeholder-[#9ab0a0] focus:outline-none focus:border-[#5E7464] focus:ring-2 focus:ring-[#5E7464]/20 transition-all text-2xl tracking-[0.5em] text-center font-bold"
+                  />
+                </div>
+
+                <button type="submit" disabled={loading || otp.length < 6}
+                  className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold py-3.5 rounded-xl transition-all hover:shadow-[0_8px_30px_rgba(94,116,100,0.35)] active:scale-[0.99] disabled:opacity-60"
+                  style={{ background: "linear-gradient(135deg,#5E7464,#42594A)" }}>
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <><span>Verify &amp; Sign In</span><ArrowRight className="w-4 h-4" /></>
+                  )}
+                </button>
+
+                <button type="button" onClick={handleSendOtp as any}
+                  className="w-full text-center text-sm text-[#5E7464] font-semibold hover:underline py-2">
+                  Resend OTP
+                </button>
+              </form>
+            </>
+          )}
+
         </div>
       </div>
     </div>
